@@ -1,0 +1,15 @@
+@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap");
+@import "tailwindcss";
+
+:root {
+  --blue: #1747a6;
+  --blue-dark: #102e70;
+  --blue-light: #dce8ff;
+  --ink: #142b52;
+  --muted: #526582;
+  --line: #cdd9e9;
+  --paper: #f5f8fc;
+  --white: #fff;
+  --lime: #d7f06b;
+  --focus: #f2c94c;
+}
