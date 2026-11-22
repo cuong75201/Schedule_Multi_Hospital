@@ -1,15 +1,28 @@
 @import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
-:root {
-  --blue: #1747a6;
-  --blue-dark: #102e70;
-  --blue-light: #dce8ff;
-  --ink: #142b52;
-  --muted: #526582;
-  --line: #cdd9e9;
-  --paper: #f5f8fc;
-  --white: #fff;
-  --lime: #d7f06b;
-  --focus: #f2c94c;
+@theme {
+  --font-sans: "Be Vietnam Pro", sans-serif;
+  --color-blue: #1747a6;
+  --color-blue-deep: #102e70;
+  --color-blue-light: #dce8ff;
+  --color-ink: #142b52;
+  --color-muted: #526582;
+  --color-line: #cdd9e9;
+  --color-paper: #f5f8fc;
+  --color-lime: #d7f06b;
+  --color-focus: #f2c94c;
+}
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body { -webkit-font-smoothing: antialiased; }
+  ::selection { background: var(--color-lime); color: var(--color-blue-deep); }
+  :focus-visible { outline: 3px solid var(--color-focus); outline-offset: 4px; }
+  a { text-underline-offset: 5px; }
+  button { cursor: pointer; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  }
 }

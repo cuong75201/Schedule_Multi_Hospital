@@ -1,0 +1,700 @@
+
+Table Hospital {
+  id String [pk, default: `uuid()`, note: 'Định danh duy nhất của bệnh viện']
+  code String [not null, unique, note: 'Mã bệnh viện, duy nhất trên toàn hệ thống']
+  name String [not null, note: 'Tên bệnh viện']
+  address String [note: 'Địa chỉ bệnh viện']
+  phone String [note: 'Số điện thoại liên hệ']
+  timezone String [not null, default: 'Asia/Ho_Chi_Minh', note: 'Múi giờ sử dụng để xử lý lịch khám và thời gian']
+  status HospitalStatus [not null, default: 'ACTIVE', note: 'Trạng thái hoạt động của bệnh viện']
+  createdAt DateTime [not null, default: `now()`, note: 'Thời điểm tạo bệnh viện']
+  updatedAt DateTime [not null, note: 'Thời điểm cập nhật gần nhất']
+
+  Note: 'Quản lý thông tin bệnh viện. Đây là Tenant gốc, phân tách dữ liệu giữa các bệnh viện trong hệ thống Multi-tenant.'
+}
+
+Table Department {
+  id String [pk, default: `uuid()`, note: 'Định danh duy nhất của khoa']
+  hospitalId String [not null, ref: > Hospital.id, note: 'Bệnh viện sở hữu khoa']
+  code String [not null, note: 'Mã khoa, duy nhất trong phạm vi bệnh viện']
+  name String [not null, note: 'Tên khoa']
+  status EntityStatus [not null, default: 'ACTIVE', note: 'Trạng thái hoạt động của khoa']
+
+  indexes {
+    (hospitalId, code) [unique]
+    hospitalId
+  }
+
+  Note: 'Quản lý các khoa hoặc phòng ban trực thuộc bệnh viện. Mỗi khoa thuộc một bệnh viện và mã khoa không được trùng trong cùng bệnh viện.'
+}
+
+Table Service {
+  id String [pk, default: `uuid()`, note: 'Định danh duy nhất của dịch vụ']
+  hospitalId String [not null, ref: > Hospital.id, note: 'Bệnh viện cung cấp dịch vụ']
+  departmentId String [ref: > Department.id, note: 'Khoa phụ trách dịch vụ, có thể để trống']
+  code String [not null, note: 'Mã dịch vụ, duy nhất trong phạm vi bệnh viện']
+  name String [not null, note: 'Tên dịch vụ khám hoặc dịch vụ y tế']
+  durationMin Int [note: 'Thời lượng dự kiến thực hiện dịch vụ, tính bằng phút']
+  price Decimal [note: 'Giá dịch vụ']
+  requiresDoctorSelection Boolean [not null, default: false, note: 'Xác định bệnh nhân có bắt buộc chọn bác sĩ khi đặt lịch hay không']
+  status EntityStatus [not null, default: 'ACTIVE', note: 'Trạng thái cung cấp dịch vụ']
+
+  indexes {
+    (hospitalId, code) [unique]
+    hospitalId
+  }
+
+  Note: 'Danh mục dịch vụ y tế do bệnh viện cung cấp. Một dịch vụ có thể thuộc một khoa hoặc không gắn với khoa cụ thể.'
+}
+
+
+Table HospitalPolicy {
+  id String [pk, default: `uuid()`, note: 'Định danh chính sách']
+  hospitalId String [not null, ref: > Hospital.id, note: 'Bệnh viện áp dụng chính sách']
+  serviceId String [ref: > Service.id, note: 'Dịch vụ áp dụng chính sách riêng; NULL biểu thị chính sách mặc định của bệnh viện']
+  bookingAdvanceDays Int [not null, default: 30, note: 'Số ngày tối đa bệnh nhân được phép đặt lịch trước']
+  allowOverbooking Boolean [not null, default: false, note: 'Cho phép đặt lịch vượt quá sức chứa tiêu chuẩn']
+  overbookingLimitPct Decimal [not null, default: 0, note: 'Tỷ lệ phần trăm sức chứa được phép đặt vượt']
+  preventDuplicateBooking Boolean [not null, default: true, note: 'Ngăn bệnh nhân tạo các lịch khám bị trùng lặp']
+  checkinEarlyMin Int [not null, default: 30, note: 'Số phút bệnh nhân được phép check-in trước giờ hẹn']
+  checkinLateMin Int [not null, default: 15, note: 'Số phút bệnh nhân được phép check-in trễ']
+  cancelCutoffMin Int [not null, default: 120, note: 'Thời gian tối thiểu trước giờ hẹn để được hủy lịch']
+  allowSelfCancelAfterCutoff Boolean [not null, default: false, note: 'Cho phép bệnh nhân tự hủy lịch sau thời hạn hủy thông thường']
+  noShowAfterMin Int [not null, default: 30, note: 'Khoảng thời gian sau giờ hẹn để xác định bệnh nhân không đến']
+  priorityPolicyEnabled Boolean [not null, default: true, note: 'Bật hoặc tắt chính sách ưu tiên trong quy trình tiếp nhận']
+  createdAt DateTime [not null, default: `now()`, note: 'Thời điểm tạo chính sách']
+
+  indexes {
+    (hospitalId, serviceId) [unique]
+  }
+
+  Note: 'Lưu cấu hình và quy tắc đặt lịch theo bệnh viện hoặc từng dịch vụ. Cho phép các bệnh viện vận hành với chính sách khác nhau mà không cần thay đổi mã nguồn.'
+}
+
+Table Doctor {
+  id String [pk, default: `uuid()`, note: 'Định danh duy nhất của bác sĩ']
+  fullName String [not null, note: 'Họ tên đầy đủ của bác sĩ']
+  licenseNo String [note: 'Số giấy phép hành nghề']
+  phone String [note: 'Số điện thoại liên hệ']
+  email String [note: 'Địa chỉ email']
+  status EntityStatus [not null, default: 'ACTIVE', note: 'Trạng thái hoạt động của bác sĩ']
+  createdAt DateTime [not null, default: `now()`, note: 'Thời điểm tạo hồ sơ bác sĩ']
+
+  Note: 'Lưu hồ sơ bác sĩ ở cấp hệ thống. Một bác sĩ có thể làm việc tại nhiều bệnh viện.'
+}
+
+Table DoctorHospital {
+  doctorId String [ref: > Doctor.id, note: 'Bác sĩ được phân công']
+  hospitalId String [ref: > Hospital.id, note: 'Bệnh viện tiếp nhận bác sĩ']
+  status EntityStatus [not null, default: 'ACTIVE', note: 'Trạng thái làm việc của bác sĩ tại bệnh viện']
+
+  indexes {
+    (doctorId, hospitalId) [pk]
+  }
+
+  Note: 'Bảng trung gian thể hiện quan hệ nhiều-nhiều giữa bác sĩ và bệnh viện. Cho phép quản lý trạng thái công tác của bác sĩ tại từng bệnh viện.'
+}
+
+Table DoctorService {
+  doctorId String [ref: > Doctor.id, note: 'Bác sĩ có khả năng thực hiện dịch vụ']
+  serviceId String [ref: > Service.id, note: 'Dịch vụ bác sĩ được phân công']
+  hospitalId String [not null, ref: > Hospital.id, note: 'Bệnh viện áp dụng việc phân công dịch vụ']
+
+  indexes {
+    (doctorId, serviceId) [pk]
+    hospitalId
+  }
+
+  Note: 'Xác định các dịch vụ mà bác sĩ được phép thực hiện tại bệnh viện. Hỗ trợ kiểm tra điều kiện phân công bác sĩ khi đặt lịch.'
+}
+
+Table DoctorSchedule {
+  id String [pk, default: `uuid()`, note: 'Định danh lịch làm việc']
+  doctorId String [not null, ref: > Doctor.id, note: 'Bác sĩ sở hữu lịch làm việc']
+  hospitalId String [not null, ref: > Hospital.id, note: 'Bệnh viện nơi bác sĩ làm việc']
+  departmentId String [ref: > Department.id, note: 'Khoa nơi bác sĩ làm việc trong ca này']
+  scheduleDate DateTime [not null, note: 'Ngày làm việc của bác sĩ']
+  shift Shift [not null, note: 'Ca làm việc: sáng, chiều hoặc tối']
+  startTime DateTime [not null, note: 'Thời điểm bắt đầu làm việc']
+  endTime DateTime [not null, note: 'Thời điểm kết thúc làm việc']
+  status ScheduleStatus [not null, default: 'ACTIVE', note: 'Trạng thái lịch: đang hoạt động hoặc nghỉ']
+
+  indexes {
+    (doctorId, hospitalId, scheduleDate, shift) [unique]
+    (hospitalId, scheduleDate)
+  }
+
+  Note: 'Quản lý lịch làm việc của bác sĩ theo bệnh viện, khoa, ngày và ca. Là cơ sở để tạo các khung tiếp nhận bệnh nhân.'
+}
+
+
+Table ReceptionWindow {
+  id String [pk, default: `uuid()`, note: 'Định danh khung tiếp nhận']
+  hospitalId String [not null, ref: > Hospital.id, note: 'Bệnh viện tổ chức tiếp nhận']
+  departmentId String [ref: > Department.id, note: 'Khoa phụ trách tiếp nhận']
+  serviceId String [not null, ref: > Service.id, note: 'Dịch vụ được cung cấp trong khung giờ']
+  doctorId String [ref: > Doctor.id, note: 'Bác sĩ phụ trách khung tiếp nhận, có thể để trống']
+  scheduleId String [ref: > DoctorSchedule.id, note: 'Lịch làm việc gốc của bác sĩ']
+  windowDate DateTime [not null, note: 'Ngày diễn ra khung tiếp nhận']
+  startTime DateTime [not null, note: 'Thời điểm bắt đầu tiếp nhận']
+  endTime DateTime [not null, note: 'Thời điểm kết thúc tiếp nhận']
+  capacity Int [not null, default: 0, note: 'Số lượng bệnh nhân tối đa theo sức chứa tiêu chuẩn']
+  overbookingLimit Int [not null, default: 0, note: 'Số lượng bệnh nhân tối đa được phép đặt vượt']
+  status WindowStatus [not null, default: 'OPEN', note: 'Trạng thái mở, đóng hoặc đã đủ chỗ']
+  createdAt DateTime [not null, default: `now()`, note: 'Thời điểm tạo khung tiếp nhận']
+  updatedAt DateTime [not null, note: 'Thời điểm cập nhật gần nhất']
+
+  indexes {
+    (hospitalId, serviceId, windowDate, status)
+    (doctorId, windowDate)
+  }
+
+  Note: 'Đại diện cho một khoảng thời gian bệnh viện mở để tiếp nhận bệnh nhân. Là đơn vị quản lý sức chứa và đối tượng được bệnh nhân lựa chọn khi đặt lịch.'
+}
+
+Table CapacityCounter {
+  windowId String [pk, ref: - ReceptionWindow.id, note: 'Khung tiếp nhận được theo dõi sức chứa']
+  bookedCount Int [not null, default: 0, note: 'Số lượng lịch đã đặt và đang chiếm dụng sức chứa']
+  version Int [not null, default: 0, note: 'Phiên bản dữ liệu dùng cho cơ chế Optimistic Locking, phát hiện cập nhật đồng thời']
+
+  Note: 'Bộ đếm sức chứa của từng ReceptionWindow. Giúp kiểm soát số lượng đặt lịch đồng thời mà không phải liên tục đếm toàn bộ Appointment.'
+}
+
+
+Table Patient {
+  id String [pk, default: `uuid()`, note: 'Định danh duy nhất của bệnh nhân']
+  fullName String [not null, note: 'Họ tên đầy đủ của bệnh nhân']
+  dateOfBirth DateTime [note: 'Ngày sinh']
+  gender String [note: 'Giới tính']
+  phone String [note: 'Số điện thoại liên hệ']
+  email String [note: 'Địa chỉ email']
+  status EntityStatus [not null, default: 'ACTIVE', note: 'Trạng thái hồ sơ bệnh nhân']
+  createdAt DateTime [not null, default: `now()`, note: 'Thời điểm tạo hồ sơ']
+
+  Note: 'Quản lý hồ sơ bệnh nhân độc lập với tài khoản đăng nhập. Cho phép bệnh viện tạo hồ sơ bệnh nhân ngay cả khi bệnh nhân chưa đăng ký tài khoản.'
+}
+
+Table UserAccount {
+  id String [pk, default: `uuid()`, note: 'Định danh tài khoản']
+  patientId String [not null, unique, ref: - Patient.id, note: 'Bệnh nhân sở hữu tài khoản; mỗi bệnh nhân tối đa một tài khoản']
+  username String [not null, unique, note: 'Tên đăng nhập, duy nhất trên hệ thống']
+  passwordHash String [not null, note: 'Mật khẩu đã được băm an toàn, không lưu mật khẩu gốc']
+  isVerified Boolean [not null, default: false, note: 'Tài khoản đã được xác thực hay chưa']
+  verifiedAt DateTime [note: 'Thời điểm xác thực tài khoản']
+  status EntityStatus [not null, default: 'ACTIVE', note: 'Trạng thái tài khoản']
+  createdAt DateTime [not null, default: `now()`, note: 'Thời điểm tạo tài khoản']
+
+  Note: 'Quản lý thông tin xác thực và đăng nhập của bệnh nhân. Tách biệt thông tin tài khoản khỏi hồ sơ bệnh nhân.'
+}
+
+Table HospitalStaff {
+  id String [pk, default: `uuid()`, note: 'Định danh nhân viên tại bệnh viện']
+  hospitalId String [not null, ref: > Hospital.id, note: 'Bệnh viện nơi nhân viên làm việc']
+  userAccountId String [ref: > UserAccount.id, note: 'Tài khoản liên kết, có thể để trống']
+  fullName String [not null, note: 'Họ tên nhân viên']
+  role StaffRole [not null, note: 'Vai trò của nhân viên trong bệnh viện']
+  status EntityStatus [not null, default: 'ACTIVE', note: 'Trạng thái làm việc']
+
+  indexes {
+    (hospitalId, role)
+  }
+
+  Note: 'Quản lý nhân sự và vai trò tại từng bệnh viện. Có thể liên kết tài khoản để nhân viên đăng nhập và sử dụng chức năng nội bộ.'
+}
+Table Appointment {
+  id String [pk, default: `uuid()`, note: 'Định danh duy nhất của lịch khám']
+  bookingCode String [not null, unique, note: 'Mã đặt lịch, dùng để tra cứu và xác nhận lịch khám']
+  hospitalId String [not null, ref: > Hospital.id, note: 'Bệnh viện tiếp nhận bệnh nhân']
+  patientId String [not null, ref: > Patient.id, note: 'Bệnh nhân đặt lịch']
+  serviceId String [not null, ref: > Service.id, note: 'Dịch vụ bệnh nhân đăng ký']
+  windowId String [not null, ref: > ReceptionWindow.id, note: 'Khung tiếp nhận được lựa chọn']
+  doctorId String [ref: > Doctor.id, note: 'Bác sĩ được chọn hoặc phân công']
+  status AppointmentStatus [not null, default: 'BOOKED', note: 'Trạng thái hiện tại của lịch khám']
+  supersededById String [unique, ref: - Appointment.id, note: 'Lịch mới thay thế lịch hiện tại khi đổi lịch']
+  parentAppointmentId String [ref: > Appointment.id, note: 'Lịch gốc mà lịch hiện tại được tạo ra từ đó']
+  priorityFlag Boolean [not null, default: false, note: 'Đánh dấu lịch được ưu tiên tiếp nhận']
+  prioritySetById String [ref: > HospitalStaff.id, note: 'Nhân viên thiết lập quyền ưu tiên']
+  priorityReason String [note: 'Lý do thiết lập ưu tiên']
+  cancelledBy CancelledBy [note: 'Đối tượng thực hiện hủy lịch']
+  cancelReason String [note: 'Lý do hủy lịch']
+  cancelledAt DateTime [note: 'Thời điểm hủy lịch']
+  bookedAt DateTime [not null, default: `now()`, note: 'Thời điểm tạo lịch']
+  checkedInAt DateTime [note: 'Thời điểm bệnh nhân check-in']
+  completedAt DateTime [note: 'Thời điểm hoàn thành khám']
+
+  indexes {
+    (patientId, status)
+    (windowId, status)
+    (hospitalId, status)
+  }
+
+  Note: 'Bảng trung tâm của nghiệp vụ đặt lịch. Lưu thông tin đặt khám, trạng thái, đổi lịch, hủy lịch và quyền ưu tiên. Các thay đổi trạng thái cần được kiểm soát theo State Machine.'
+}
+
+
+Table CheckIn {
+  id String [pk, default: `uuid()`, note: 'Định danh bản ghi check-in']
+  appointmentId String [not null, unique, ref: - Appointment.id, note: 'Lịch khám được xác nhận đã đến']
+  hospitalId String [not null, ref: > Hospital.id, note: 'Bệnh viện thực hiện tiếp nhận']
+  checkedInById String [ref: > HospitalStaff.id, note: 'Nhân viên thực hiện check-in, có thể để trống khi bệnh nhân tự check-in']
+  method CheckInMethod [not null, note: 'Phương thức xác nhận đến khám']
+  checkedInAt DateTime [not null, default: `now()`, note: 'Thời điểm check-in']
+  isLate Boolean [not null, default: false, note: 'Xác định bệnh nhân có check-in trễ hay không']
+  "note" String [note: 'Ghi chú bổ sung về quá trình check-in']
+
+  Note: 'Ghi nhận việc bệnh nhân đã có mặt tại bệnh viện. Mỗi lịch khám chỉ có tối đa một bản ghi check-in.'
+}
+
+Table QueueEntry {
+  id String [pk, default: `uuid()`, note: 'Định danh lượt xếp hàng']
+  appointmentId String [not null, ref: > Appointment.id, note: 'Lịch khám tương ứng với lượt trong hàng đợi']
+  hospitalId String [not null, ref: > Hospital.id, note: 'Bệnh viện tổ chức hàng đợi']
+  queueDate DateTime [not null, note: 'Ngày tổ chức hàng đợi']
+  queuePosition Int [note: 'Vị trí của bệnh nhân trong hàng đợi']
+  status QueueStatus [not null, default: 'WAITING', note: 'Trạng thái hiện tại của lượt khám']
+  priorityFlag Boolean [not null, default: false, note: 'Đánh dấu lượt được ưu tiên trong hàng đợi']
+  createdAt DateTime [not null, default: `now()`, note: 'Thời điểm đưa vào hàng đợi']
+  updatedAt DateTime [not null, note: 'Thời điểm cập nhật gần nhất']
+
+  indexes {
+    (hospitalId, queueDate, status, queuePosition)
+  }
+
+  Note: 'Quản lý hàng đợi khám bệnh sau khi bệnh nhân check-in. Hỗ trợ đánh số thứ tự, gọi lượt, bỏ lượt và ưu tiên tiếp nhận.'
+}
+
+
+Table AppointmentStatusHistory {
+  id BigInt [pk, increment, note: 'Định danh bản ghi lịch sử tự tăng']
+  appointmentId String [not null, ref: > Appointment.id, note: 'Lịch khám có trạng thái thay đổi']
+  fromStatus AppointmentStatus [note: 'Trạng thái trước khi thay đổi, NULL nếu là lần khởi tạo']
+  toStatus AppointmentStatus [not null, note: 'Trạng thái sau khi thay đổi']
+  changedBy String [note: 'ID người hoặc hệ thống thực hiện thay đổi']
+  changedAt DateTime [not null, default: `now()`, note: 'Thời điểm thay đổi trạng thái']
+  "note" String [note: 'Lý do hoặc nội dung giải thích thay đổi trạng thái']
+
+  indexes {
+    appointmentId
+  }
+
+  Note: 'Lưu lịch sử chuyển trạng thái của lịch khám. Giúp truy vết quá trình xử lý và xác định ai đã thay đổi trạng thái tại thời điểm nào.'
+}
+
+Table AuditLog {
+  id BigInt [pk, increment, note: 'Định danh bản ghi nhật ký tự tăng']
+  hospitalId String [ref: > Hospital.id, note: 'Bệnh viện liên quan đến hoạt động']
+  actorId String [note: 'Định danh người hoặc hệ thống thực hiện hành động']
+  actorType String [note: 'Loại đối tượng thực hiện hành động: PATIENT, STAFF, SYSTEM hoặc loại khác']
+  action String [not null, note: 'Hành động được thực hiện: CREATE, UPDATE, DELETE...']
+  entityType String [not null, note: 'Loại thực thể bị tác động']
+  entityId String [note: 'Định danh bản ghi bị tác động']
+  oldValue Json [note: 'Dữ liệu trước khi thay đổi']
+  newValue Json [note: 'Dữ liệu sau khi thay đổi']
+  createdAt DateTime [not null, default: `now()`, note: 'Thời điểm ghi nhận hành động']
+
+  indexes {
+    (entityType, entityId)
+    (hospitalId, createdAt)
+  }
+
+  Note: 'Nhật ký kiểm toán toàn hệ thống. Theo dõi thao tác của người dùng và hệ thống trên các dữ liệu quan trọng, phục vụ kiểm tra và truy vết.'
+}
+
+Table NotificationOutbox {
+  id BigInt [pk, increment, note: 'Định danh thông báo tự tăng']
+  hospitalId String [ref: > Hospital.id, note: 'Bệnh viện phát sinh thông báo']
+  patientId String [ref: > Patient.id, note: 'Bệnh nhân nhận thông báo']
+  channel NotificationChannel [not null, note: 'Kênh gửi thông báo']
+  templateCode String [not null, note: 'Mã mẫu thông báo được sử dụng']
+  payload Json [not null, note: 'Dữ liệu truyền vào mẫu thông báo']
+  status NotificationStatus [not null, default: 'PENDING', note: 'Trạng thái xử lý gửi thông báo']
+  retryCount Int [not null, default: 0, note: 'Số lần thử gửi lại khi gặp lỗi']
+  createdAt DateTime [not null, default: `now()`, note: 'Thời điểm tạo yêu cầu gửi thông báo']
+  sentAt DateTime [note: 'Thời điểm gửi thành công']
+  errorMessage String [note: 'Thông tin lỗi trong lần gửi thất bại gần nhất']
+
+  indexes {
+    (status, createdAt)
+  }
+
+  Note: 'Triển khai Transactional Outbox Pattern. Lưu yêu cầu gửi thông báo trong cùng transaction với nghiệp vụ chính, sau đó Background Worker xử lý gửi bất đồng bộ và retry khi thất bại.'
+}
+
+Enum HospitalStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+Enum EntityStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+Enum ScheduleStatus {
+  ACTIVE
+  LEAVE
+}
+
+Enum Shift {
+  MORNING
+  AFTERNOON
+  EVENING
+}
+
+Enum WindowStatus {
+  OPEN
+  CLOSED
+  FULL
+}
+
+Enum AppointmentStatus {
+  BOOKED
+  CHECKED_IN
+  WAITING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+  RESCHEDULED
+}
+
+Enum CancelledBy {
+  PATIENT
+  HOSPITAL
+  SYSTEM
+}
+
+Enum CheckInMethod {
+  SELF
+  STAFF
+  KIOSK
+}
+
+Enum QueueStatus {
+  WAITING
+  CALLED
+  IN_PROGRESS
+  DONE
+  SKIPPED
+}
+
+Enum StaffRole {
+  ADMIN
+  STAFF
+  DOCTOR
+}
+
+Enum NotificationChannel {
+  SMS
+  EMAIL
+  PUSH
+}
+
+Enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+
+// ============================================================
+// PAYMENT & WALLET – Bổ sung theo BR-1801..1905
+// ============================================================
+
+Table HospitalWallet {
+  id String [pk, default: `uuid()`, note: 'Định danh ví của bệnh viện']
+  hospitalId String [not null, unique, ref: - Hospital.id, note: 'Mỗi bệnh viện có đúng một ví (BR-1901)']
+  balance Decimal [not null, default: 0, note: 'Số dư khả dụng hiện tại của ví']
+  currency String [not null, default: 'VND', note: 'Đơn vị tiền tệ của ví']
+  status WalletStatus [not null, default: 'ACTIVE', note: 'Trạng thái ví: hoạt động, tạm khóa rút (BR-1808), đóng']
+  version Int [not null, default: 0, note: 'Optimistic Locking khi cập nhật số dư']
+  createdAt DateTime [not null, default: `now()`, note: 'Thời điểm tạo ví (khi bệnh viện được kích hoạt)']
+  updatedAt DateTime [not null, note: 'Thời điểm cập nhật gần nhất']
+
+  indexes {
+    hospitalId
+    status
+  }
+
+  Note: 'Ví trên nền tảng của từng bệnh viện (BR-1901). Chỉ ghi có khi cổng thanh toán xác nhận thành công (BR-1902). Có thể bị tạm khóa rút khi công nợ phí quá hạn (BR-1808, BR-1903).'
+}
+
+Table WalletTransaction {
+  id String [pk, default: `uuid()`, note: 'Định danh giao dịch ví']
+  walletId String [not null, ref: > HospitalWallet.id, note: 'Ví phát sinh giao dịch']
+  hospitalId String [not null, ref: > Hospital.id, note: 'Bệnh viện sở hữu ví (denormalize để truy vấn/đối soát)']
+  type WalletTxType [not null, note: 'Loại giao dịch: ghi có do thanh toán online, rút tiền, hoàn tiền, trừ phí tháng (BR-1904)']
+  amount Decimal [not null, note: 'Số tiền giao dịch (luôn dương; chiều xác định bởi type)']
+  balanceBefore Decimal [not null, note: 'Số dư ví trước giao dịch']
+  balanceAfter Decimal [not null, note: 'Số dư ví sau giao dịch']
+  refType String [note: 'Loại đối tượng tham chiếu: PAYMENT, WITHDRAWAL, REFUND, MONTHLY_FEE...']
+  refId String [note: 'ID bản ghi tham chiếu tương ứng (Payment, WithdrawalRequest, MonthlyInvoice...)']
+  status WalletTxStatus [not null, default: 'POSTED', note: 'Trạng thái bút toán: chờ xử lý, đã ghi sổ, đã hủy/đảo']
+  description String [note: 'Diễn giải giao dịch']
+  createdAt DateTime [not null, default: `now()`, note: 'Thời điểm ghi nhận giao dịch']
+
+  indexes {
+    (walletId, createdAt)
+    (hospitalId, type, createdAt)
+    (refType, refId)
+    walletId
+  }
+
+  Note: 'Lịch sử biến động số dư ví phục vụ đối soát (BR-1904). Mọi thay đổi số dư đều phải sinh một bản ghi tại đây. Không được xóa/sửa, chỉ đảo bút toán.'
+}
+
+Table Payment {
+  id String [pk, default: `uuid()`, note: 'Định danh giao dịch thanh toán của bệnh nhân']
+  hospitalId String [not null, ref: > Hospital.id, note: 'Bệnh viện nhận tiền']
+  patientId String [not null, ref: > Patient.id, note: 'Bệnh nhân thanh toán']
+  appointmentId String [ref: > Appointment.id, note: 'Lịch khám được thanh toán (nếu có)']
+  amount Decimal [not null, note: 'Số tiền thanh toán']
+  currency String [not null, default: 'VND', note: 'Đơn vị tiền tệ']
+  method PaymentMethod [not null, note: 'Phương thức: online qua cổng, tiền mặt tại quầy... (BR-1804, BR-1805)']
+  channel PaymentChannel [not null, note: 'Kênh thu: ONLINE (qua nền tảng) hoặc COUNTER (thu tại quầy khi check-in)']
+  status PaymentStatus [not null, default: 'PENDING', note: 'Trạng thái giao dịch thanh toán']
+  gatewayProvider String [note: 'Tên cổng thanh toán (VNPay, Momo...) nếu thanh toán online']
+  gatewayTxnId String [note: 'Mã giao dịch phía cổng thanh toán, dùng chống trùng webhook (BR-1902)']
+  paidAt DateTime [note: 'Thời điểm thanh toán thành công']
+  collectedById String [ref: > HospitalStaff.id, note: 'Nhân viên thu tiền tại quầy (BR-1804)']
+  createdAt DateTime [not null, default: `now()`, note: 'Thời điểm tạo bản ghi thanh toán']
+  updatedAt DateTime [not null, note: 'Thời điểm cập nhật gần nhất']
+
+  indexes {
+    appointmentId
+    (hospitalId, channel, paidAt)
+    (patientId, status)
+    gatewayTxnId [unique]
+  }
+
+  Note: 'Ghi nhận thanh toán của bệnh nhân cho lịch khám. Thanh toán online được ghi có vào ví bệnh viện (BR-1803); khoản thu tại quầy vẫn tính vào doanh thu tháng để tính phí (BR-1805). Không khấu trừ phí nền tảng tại thời điểm giao dịch.'
+}
+
+Table PaymentWebhookEvent {
+  id String [pk, default: `uuid()`, note: 'Định danh sự kiện webhook']
+  provider String [not null, note: 'Cổng thanh toán gửi webhook']
+  eventId String [not null, note: 'Mã sự kiện phía cổng thanh toán, dùng chống xử lý trùng (BR-1902)']
+  paymentId String [ref: > Payment.id, note: 'Giao dịch thanh toán liên quan']
+  rawPayload Json [not null, note: 'Dữ liệu gốc của webhook']
+  status WebhookEventStatus [not null, default: 'RECEIVED', note: 'Trạng thái xử lý sự kiện webhook']
+  processedAt DateTime [note: 'Thời điểm xử lý xong']
+  createdAt DateTime [not null, default: `now()`, note: 'Thời điểm nhận webhook']
+
+  indexes {
+    (provider, eventId) [unique]
+    paymentId
+  }
+
+  Note: 'Lưu mọi webhook từ cổng thanh toán. Ràng buộc unique (provider, eventId) đảm bảo webhook trùng lặp không ghi có ví hai lần (BR-1902).'
+}
+
+Table WithdrawalRequest {
+  id String [pk, default: `uuid()`, note: 'Định danh yêu cầu rút tiền']
+  hospitalId String [not null, ref: > Hospital.id, note: 'Bệnh viện yêu cầu rút']
+  walletId String [not null, ref: > HospitalWallet.id, note: 'Ví nguồn rút tiền']
+  amount Decimal [not null, note: 'Số tiền yêu cầu rút, không vượt quá số dư khả dụng (BR-1903)']
+  bankAccountNo String [not null, note: 'Số tài khoản nhận tiền của bệnh viện']
+  bankName String [not null, note: 'Tên ngân hàng nhận tiền']
+  accountHolder String [not null, note: 'Tên chủ tài khoản nhận tiền']
+  status WithdrawalStatus [not null, default: 'PENDING', note: 'Trạng thái yêu cầu rút tiền']
+  requestedById String [ref: > HospitalStaff.id, note: 'Admin bệnh viện tạo yêu cầu']
+  approvedById String [ref: > HospitalStaff.id, note: 'Người phê duyệt (nếu cần)']
+  rejectionReason String [note: 'Lý do từ chối yêu cầu rút']
+  requestedAt DateTime [not null, default: `now()`, note: 'Thời điểm tạo yêu cầu']
+  processedAt DateTime [note: 'Thời điểm hoàn tất xử lý rút tiền']
+  createdAt DateTime [not null, default: `now()`, note: 'Thời điểm tạo bản ghi']
+
+  indexes {
+    (hospitalId, status, requestedAt)
+    walletId
+  }
+
+  Note: 'Yêu cầu rút tiền từ ví về tài khoản bệnh viện (BR-1903). Có thể bị chặn khi ví bị tạm khóa do công nợ phí quá hạn (BR-1808).'
+}
+
+Table MonthlyInvoice {
+  id String [pk, default: `uuid()`, note: 'Định danh hóa đơn phí tháng']
+  hospitalId String [not null, ref: > Hospital.id, note: 'Bệnh viện được lập hóa đơn']
+  periodYear Int [not null, note: 'Năm của kỳ tính phí']
+  periodMonth Int [not null, note: 'Tháng của kỳ tính phí (1-12)']
+  onlineRevenue Decimal [not null, default: 0, note: 'Doanh thu đặt lịch thanh toán online trong kỳ']
+  counterRevenue Decimal [not null, default: 0, note: 'Doanh thu thu tại quầy khi check-in trong kỳ (BR-1805)']
+  totalRevenue Decimal [not null, note: 'Tổng doanh thu tính phí = onlineRevenue + counterRevenue']
+  feeRatePct Decimal [not null, note: 'Tỷ lệ phí áp dụng theo bậc doanh thu (10–15%, BR-1802)']
+  feeTierCode String [note: 'Mã bậc doanh thu áp dụng']
+  feeAmount Decimal [not null, note: 'Số phí phải nộp của kỳ']
+  status InvoiceStatus [not null, default: 'DRAFT', note: 'Trạng thái hóa đơn: nháp, đã phát hành, đã thanh toán, quá hạn...']
+  dueDate DateTime [note: 'Hạn thanh toán hóa đơn']
+  paidAt DateTime [note: 'Thời điểm thanh toán hóa đơn']
+  paidFromWallet Boolean [not null, default: false, note: 'Hóa đơn được thanh toán bằng cách trừ từ ví hay chuyển khoản (BR-1806)']
+  walletTransactionId String [ref: > WalletTransaction.id, note: 'Bút toán trừ ví tương ứng khi thanh toán bằng ví']
+  debtAmount Decimal [not null, default: 0, note: 'Số phí còn nợ sau hạn (công nợ, BR-1806)']
+  createdAt DateTime [not null, default: `now()`, note: 'Thời điểm tạo hóa đơn (chốt cuối tháng)']
+  updatedAt DateTime [not null, note: 'Thời điểm cập nhật gần nhất']
+
+  indexes {
+    (hospitalId, periodYear, periodMonth) [unique]
+    (status, dueDate)
+  }
+
+  Note: 'Hóa đơn phí nền tảng theo tháng cho từng bệnh viện (BR-1806). Ghi rõ doanh thu online, tại quầy, bậc/tỷ lệ áp dụng và số phí. Phí chưa thanh toán sau hạn trở thành công nợ.'
+}
+
+Table FeeTierConfig {
+  id String [pk, default: `uuid()`, note: 'Định danh cấu hình bậc phí']
+  code String [not null, unique, note: 'Mã bậc doanh thu']
+  minRevenue Decimal [not null, note: 'Doanh thu tối thiểu của bậc (tính bằng VND)']
+  maxRevenue Decimal [note: 'Doanh thu tối đa của bậc; NULL là bậc cao nhất không giới hạn']
+  feeRatePct Decimal [not null, note: 'Tỷ lệ phí của bậc (khung 10–15%, BR-1802)']
+  effectiveFrom DateTime [not null, note: 'Thời điểm bắt đầu hiệu lực (chỉ áp dụng kỳ tính phí sau khi thay đổi, BR-1802)']
+  effectiveTo DateTime [note: 'Thời điểm hết hiệu lực']
+  status EntityStatus [not null, default: 'ACTIVE', note: 'Trạng thái cấu hình']
+  createdById String [ref: > HospitalStaff.id, note: 'Super Admin cấu hình bậc phí']
+  createdAt DateTime [not null, default: `now()`, note: 'Thời điểm tạo cấu hình']
+
+  indexes {
+    (effectiveFrom, effectiveTo)
+    status
+  }
+
+  Note: 'Cấu hình bậc doanh thu và tỷ lệ phí do Super Admin quản lý (BR-1802). Thay đổi bậc/tỷ lệ chỉ áp dụng từ kỳ tính phí sau, nên dùng mốc effectiveFrom/effectiveTo thay vì sửa trực tiếp.'
+}
+
+Table DebtAlertConfig {
+  id String [pk, default: `uuid()`, note: 'Định danh cấu hình cảnh báo công nợ']
+  thresholdAmount Decimal [not null, note: 'Ngưỡng công nợ kích hoạt cảnh báo (BR-1807)']
+  thresholdDays Int [note: 'Số ngày quá hạn để kích hoạt cảnh báo/công nợ']
+  actionOnExceed DebtAction [not null, default: 'WARN_ONLY', note: 'Hành động khi vượt ngưỡng: chỉ cảnh báo, khóa rút ví, tạm dừng booking mới (BR-1808)']
+  status EntityStatus [not null, default: 'ACTIVE', note: 'Trạng thái cấu hình']
+  createdById String [ref: > HospitalStaff.id, note: 'Super Admin cấu hình ngưỡng']
+  createdAt DateTime [not null, default: `now()`, note: 'Thời điểm tạo cấu hình']
+
+  Note: 'Cấu hình ngưỡng cảnh báo công nợ phí (BR-1807). Khi vượt ngưỡng, hệ thống áp dụng biện pháp xử lý tương ứng (BR-1808), không tự động hủy lịch đã xác nhận (nhất quán BR-204).'
+}
+
+// -------------------- Enums --------------------
+
+Enum WalletStatus {
+  ACTIVE
+  WITHDRAW_LOCKED   // tạm khóa rút do công nợ quá hạn (BR-1808)
+  CLOSED
+}
+
+Enum WalletTxType {
+  CREDIT_PAYMENT     // ghi có do thanh toán online (BR-1803)
+  WITHDRAWAL         // rút tiền (BR-1903)
+  REFUND             // hoàn tiền
+  MONTHLY_FEE        // trừ phí tháng nếu trả từ ví (BR-1806)
+  ADJUSTMENT         // điều chỉnh/đối soát
+}
+
+Enum WalletTxStatus {
+  PENDING
+  POSTED
+  REVERSED
+}
+
+Enum PaymentMethod {
+  ONLINE_GATEWAY
+  CASH_AT_COUNTER
+  BANK_TRANSFER
+}
+
+Enum PaymentChannel {
+  ONLINE    // qua nền tảng
+  COUNTER   // thu tại quầy khi check-in (BR-1804)
+}
+
+Enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+Enum WebhookEventStatus {
+  RECEIVED
+  PROCESSED
+  IGNORED    // trùng lặp (BR-1902)
+  FAILED
+}
+
+Enum WithdrawalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PAID
+}
+
+Enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PAID
+  OVERDUE
+  VOID
+}
+
+Enum DebtAction {
+  WARN_ONLY
+  LOCK_WITHDRAWAL
+  SUSPEND_BOOKING
+}
+
+DiagramView "All tables" {
+  Tables { * }
+}
+
+// ============================================================
+// TABLEGROUPS THEO MICROSERVICE
+// (thay thế các TableGroup theo miền nghiệp vụ cũ)
+// ============================================================
+
+TableGroup "MS1 · Tenant & Organization" [color: #4A6FF5] {
+  Hospital
+  Department
+  Service
+  HospitalPolicy
+}
+
+TableGroup "MS2 · Doctor & Scheduling" [color: #00A3A3] {
+  Doctor
+  DoctorHospital
+  DoctorService
+  DoctorSchedule
+}
+
+TableGroup "MS3 · Reception & Capacity" [color: #E8453C] {
+  ReceptionWindow
+  CapacityCounter
+}
+
+TableGroup "MS4 · Booking & Patient" [color: #2E7D32] {
+  Patient
+  UserAccount
+  HospitalStaff
+  Appointment
+  CheckIn
+  QueueEntry
+  AppointmentStatusHistory
+}
+
+TableGroup "MS5 · Payment & Wallet" [color: #D81B60] {
+  HospitalWallet
+  WalletTransaction
+  Payment
+  PaymentWebhookEvent
+  WithdrawalRequest
+}
+
+TableGroup "MS6 · Billing & Platform Fee" [color: #455A64] {
+  MonthlyInvoice
+  FeeTierConfig
+  DebtAlertConfig
+}
+
+TableGroup "SHARED · Platform Infrastructure" [color: #607D8B] {
+  AuditLog
+  NotificationOutbox
+}
