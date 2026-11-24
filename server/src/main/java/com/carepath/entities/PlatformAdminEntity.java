@@ -39,6 +39,7 @@ public class PlatformAdminEntity {
     private String email;
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(nullable = false)
     private EntityStatus status = EntityStatus.ACTIVE;
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

@@ -1,7 +1,6 @@
 package com.carepath.entities;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -12,6 +11,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
@@ -52,6 +53,15 @@ public class HospitalPolicyEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "hospital_id", nullable = false)
+    private HospitalEntity hospital;
+
+    @ManyToOne
+    @JoinColumn(name = "service_id")
+    private ServiceEntity service;
+
     @Column(nullable = false)
     private int bookingAdvanceDays = 30;
     @Column(nullable = false)

@@ -43,15 +43,14 @@ public class DoctorEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     @Column(nullable = false)
-    private String name;
-    @Column(nullable = false, unique = true)
+    private String fullName;
     private String licenseNo;
-    @Column(unique = true, length = 20)
+    @Column(length = 20)
     private String phone;
-    @Column(unique = true)
     private String email;
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(nullable = false)
     private EntityStatus status = EntityStatus.ACTIVE;
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

@@ -37,25 +37,25 @@ public class ServiceEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String code;
     @Column(nullable = false)
     private String name;
-    @Column(nullable = false)
-    private int durationMin;
-    @Column(nullable = false, precision = 12, scale = 0)
+    private Integer durationMin;
+    @Column(precision = 12, scale = 0)
     private BigDecimal price;
     @Column(nullable = false)
     private boolean requiresDoctorSelection = false;
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(nullable = false)
     private EntityStatus status = EntityStatus.ACTIVE;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "hospital_id", nullable = false)
     private HospitalEntity hospital;
 
-    @ManyToOne(optional = false)
+    @ManyToOne
     @JoinColumn(name = "department_id")
     private DepartmentEntity department;
 

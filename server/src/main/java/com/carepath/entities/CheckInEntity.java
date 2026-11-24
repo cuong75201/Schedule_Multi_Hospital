@@ -58,5 +58,4 @@ public class CheckInEntity {
     @Column(name = "is_late", nullable = false)
     private boolean isLate = false;
 
-    private String note;
 }

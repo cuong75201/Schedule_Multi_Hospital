@@ -5,6 +5,7 @@ import org.hibernate.type.SqlTypes;
 
 import com.carepath.entities.enums.EntityStatus;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -38,5 +39,6 @@ public class DoctorHospitalEntity {
 
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(nullable = false)
     private EntityStatus status = EntityStatus.ACTIVE;
 }

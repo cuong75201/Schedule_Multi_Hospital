@@ -44,6 +44,7 @@ public class HospitalEntity {
     private String timezone = "Asia/Ho_Chi_Minh";
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(nullable = false)
     private HospitalStatus status = HospitalStatus.ACTIVE;
     @CreationTimestamp
     @Column(nullable = false,updatable = false)

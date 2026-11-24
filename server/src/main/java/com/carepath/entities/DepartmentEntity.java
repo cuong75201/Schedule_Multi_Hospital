@@ -37,12 +37,13 @@ public class DepartmentEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String code;
     @Column(nullable = false)
     private String name;
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(nullable = false)
     private EntityStatus status = EntityStatus.ACTIVE;
 
     @ManyToOne(optional = false)

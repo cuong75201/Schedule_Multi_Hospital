@@ -57,7 +57,7 @@ public class DoctorScheduleEntity {
     @JoinColumn(name = "hospital_id", nullable = false)
     private HospitalEntity hospital;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "department_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "department_id")
     private DepartmentEntity department;
 }
