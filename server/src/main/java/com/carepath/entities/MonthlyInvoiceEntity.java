@@ -65,6 +65,10 @@ public class MonthlyInvoiceEntity {
 
     private String feeTierCode;
 
+    @ManyToOne
+    @JoinColumn(name = "fee_tier_config_id")
+    private FeeTierConfigEntity feeTierConfig;
+
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal feeAmount;
 
@@ -86,6 +90,13 @@ public class MonthlyInvoiceEntity {
 
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal debtAmount = BigDecimal.ZERO;
+
+    @Column(name = "generated_by_type")
+    private String generatedByType;
+
+    @ManyToOne
+    @JoinColumn(name = "generated_by_id")
+    private PlatformAdminEntity generatedBy;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

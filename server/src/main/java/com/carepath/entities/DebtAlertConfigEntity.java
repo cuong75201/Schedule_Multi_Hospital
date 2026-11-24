@@ -52,7 +52,7 @@ public class DebtAlertConfigEntity {
 
     @ManyToOne
     @JoinColumn(name = "created_by_id")
-    private HospitalStaffEntity createdBy;
+    private PlatformAdminEntity createdBy;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

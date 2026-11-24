@@ -69,7 +69,7 @@ public class WithdrawalRequestEntity {
 
     @ManyToOne
     @JoinColumn(name = "approved_by_id")
-    private HospitalStaffEntity approvedBy;
+    private PlatformAdminEntity approvedBy;
 
     private String rejectionReason;
 
