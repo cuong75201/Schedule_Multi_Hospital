@@ -54,4 +54,6 @@ public class AppointmentStatusHistoryEntity {
     @Column(nullable = false, updatable = false)
     private LocalDateTime changedAt;
 
+    private String note;
+
 }
