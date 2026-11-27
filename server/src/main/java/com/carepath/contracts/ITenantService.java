@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import com.carepath.entities.enums.EntityStatus;
+import com.carepath.entities.enums.HospitalStatus;
+
 /**
  * ITenantService: Quản lý thông tin bệnh viện (Tenant), khoa/phòng ban, danh mục dịch vụ y tế
  * và cấu hình chính sách đặt/hủy/đổi lịch, check-in riêng biệt cho từng bệnh viện.
@@ -47,7 +50,7 @@ public interface ITenantService {
                 String address,
                 String phone,
                 String timezone,
-                String status // ACTIVE | INACTIVE | SUSPENDED
+                HospitalStatus status 
         );
 
         /**
@@ -92,6 +95,15 @@ public interface ITenantService {
                 Integer durationMin, // Có thể null
                 BigDecimal price,    // Có thể null
                 boolean requiresDoctorSelection
+        );
+
+        /**
+         * Hàm tiện ích: Lấy tất cả dịch vụ theo bệnh viện
+         * @param hospitalId
+         * @return List<Service>
+         */
+        List<Service> getAllServicesByHospital(
+                String hospitalId
         );
 
         /**
@@ -212,7 +224,7 @@ public interface ITenantService {
                 String address,
                 String phone,
                 String timezone,
-                String status, // ACTIVE | INACTIVE | SUSPENDED
+                HospitalStatus status, 
                 ZonedDateTime createdAt,
                 ZonedDateTime updatedAt
         ) {}
@@ -222,7 +234,7 @@ public interface ITenantService {
                 String hospitalId,
                 String code,
                 String name,
-                String status // ACTIVE | INACTIVE | SUSPENDED
+                EntityStatus status
         ) {}
 
         record Service(
@@ -234,7 +246,7 @@ public interface ITenantService {
                 Integer durationMin,
                 BigDecimal price,
                 boolean requiresDoctorSelection,
-                String status // ACTIVE | INACTIVE | SUSPENDED
+                EntityStatus status
         ) {}
 
         record HospitalPolicy(
