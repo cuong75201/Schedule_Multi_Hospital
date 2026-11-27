@@ -23,6 +23,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -34,6 +37,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class HospitalWalletEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -44,18 +49,22 @@ public class HospitalWalletEntity {
     private HospitalEntity hospital;
 
     @Column(nullable = false, precision = 19, scale = 2)
+    @Builder.Default
     private BigDecimal balance = BigDecimal.ZERO;
 
     @Column(nullable = false, length = 3)
+    @Builder.Default
     private String currency = "VND";
 
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(nullable = false)
+    @Builder.Default
     private WalletStatus status = WalletStatus.ACTIVE;
 
     @Version
     @Column(nullable = false)
+    @Builder.Default
     private int version = 0;
 
     @CreationTimestamp

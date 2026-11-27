@@ -15,6 +15,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -49,6 +52,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class HospitalPolicyEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -63,24 +68,34 @@ public class HospitalPolicyEntity {
     private ServiceEntity service;
 
     @Column(nullable = false)
+    @Builder.Default
     private int bookingAdvanceDays = 30;
     @Column(nullable = false)
+    @Builder.Default
     private boolean allowOverbooking = false;
     @Column(nullable = false)
+    @Builder.Default
     private BigDecimal overbookingLimitPct = BigDecimal.ZERO;
     @Column(nullable = false)
+    @Builder.Default
     private boolean preventDuplicateBooking = true;
     @Column(nullable = false)
+    @Builder.Default
     private int checkinEarlyMin = 30;
     @Column(nullable = false)
+    @Builder.Default
     private int checkinLateMin = 15;
     @Column(nullable = false)
+    @Builder.Default
     private int cancelCutoffMin = 120;
     @Column(nullable = false)
+    @Builder.Default
     private boolean allowSelfCancelAfterCutoff = false;
     @Column(nullable = false)
+    @Builder.Default
     private int noShowAfterMin = 30;
     @Column(nullable = false)
+    @Builder.Default
     private boolean priorityPolicyEnabled = true;
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

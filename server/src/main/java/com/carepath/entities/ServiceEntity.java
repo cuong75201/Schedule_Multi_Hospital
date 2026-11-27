@@ -20,6 +20,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -33,6 +36,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class ServiceEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -45,10 +50,12 @@ public class ServiceEntity {
     @Column(precision = 12, scale = 0)
     private BigDecimal price;
     @Column(nullable = false)
+    @Builder.Default
     private boolean requiresDoctorSelection = false;
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(nullable = false)
+    @Builder.Default
     private EntityStatus status = EntityStatus.ACTIVE;
 
     @ManyToOne(optional = false)

@@ -22,6 +22,9 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -35,6 +38,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class ReceptionWindowEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -70,14 +75,17 @@ public class ReceptionWindowEntity {
     private LocalDateTime endTime;
 
     @Column(nullable = false)
+    @Builder.Default
     private int capacity = 0;
 
     @Column(nullable = false)
+    @Builder.Default
     private int overbookingLimit = 0;
 
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(nullable = false)
+    @Builder.Default
     private WindowStatus status = WindowStatus.OPEN;
 
     @CreationTimestamp

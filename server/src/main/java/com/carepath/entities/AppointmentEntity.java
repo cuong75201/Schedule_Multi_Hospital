@@ -22,6 +22,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -35,6 +38,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class AppointmentEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -66,6 +71,7 @@ public class AppointmentEntity {
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(nullable = false)
+    @Builder.Default
     private AppointmentStatus status = AppointmentStatus.BOOKED;
 
     @OneToOne
@@ -77,6 +83,7 @@ public class AppointmentEntity {
     private AppointmentEntity parentAppointment;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean priorityFlag = false;
 
     @ManyToOne

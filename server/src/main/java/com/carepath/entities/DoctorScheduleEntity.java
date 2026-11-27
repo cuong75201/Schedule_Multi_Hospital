@@ -22,6 +22,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "doctor_schedule", uniqueConstraints = {
@@ -30,6 +34,9 @@ import jakarta.persistence.UniqueConstraint;
 }, indexes = {
         @Index(name = "idx_doctor_schedule", columnList = "hospital_id,schedule_date")
 })
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class DoctorScheduleEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -47,6 +54,7 @@ public class DoctorScheduleEntity {
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(nullable = false)
+    @Builder.Default
     private ScheduleStatus status = ScheduleStatus.ACTIVE;
 
     @ManyToOne(optional = false)

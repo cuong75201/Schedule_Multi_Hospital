@@ -10,6 +10,9 @@ import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,6 +22,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class CapacityCounterEntity {
     @Id
     @Column(name = "window_id")
@@ -30,10 +35,12 @@ public class CapacityCounterEntity {
     private ReceptionWindowEntity window;
 
     @Column(nullable = false)
+    @Builder.Default
     private int bookedCount = 0;
 
     @Version
     @Column(nullable = false)
+    @Builder.Default
     private int version = 0;
 
     public CapacityCounterEntity(ReceptionWindowEntity window) {

@@ -7,6 +7,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,6 +22,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class DoctorServiceEntity {
     @EmbeddedId
     private DoctorServiceId id;
@@ -37,6 +41,7 @@ public class DoctorServiceEntity {
     @JoinColumn(name = "hospital_id", nullable = false)
     private HospitalEntity hospital;
 
+    @Builder
     public DoctorServiceEntity(DoctorEntity doctor, ServiceEntity service) {
         this.doctor = doctor;
         this.service = service;

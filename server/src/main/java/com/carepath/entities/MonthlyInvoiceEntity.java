@@ -23,6 +23,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -36,6 +39,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class MonthlyInvoiceEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -52,9 +57,11 @@ public class MonthlyInvoiceEntity {
     private int periodMonth;
 
     @Column(nullable = false, precision = 19, scale = 2)
+    @Builder.Default
     private BigDecimal onlineRevenue = BigDecimal.ZERO;
 
     @Column(nullable = false, precision = 19, scale = 2)
+    @Builder.Default
     private BigDecimal counterRevenue = BigDecimal.ZERO;
 
     @Column(nullable = false, precision = 19, scale = 2)
@@ -75,6 +82,7 @@ public class MonthlyInvoiceEntity {
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(nullable = false)
+    @Builder.Default
     private InvoiceStatus status = InvoiceStatus.DRAFT;
 
     private LocalDateTime dueDate;
@@ -82,6 +90,7 @@ public class MonthlyInvoiceEntity {
     private LocalDateTime paidAt;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean paidFromWallet = false;
 
     @ManyToOne
@@ -89,6 +98,7 @@ public class MonthlyInvoiceEntity {
     private WalletTransactionEntity walletTransaction;
 
     @Column(nullable = false, precision = 19, scale = 2)
+    @Builder.Default
     private BigDecimal debtAmount = BigDecimal.ZERO;
 
     @Column(name = "generated_by_type")
