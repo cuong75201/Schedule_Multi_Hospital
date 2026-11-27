@@ -3,6 +3,8 @@ node_modules/
 
 # Local design workspace
 .impeccable/
+/DESIGN.md
+/PRODUCT.md
 
 # Build outputs
 server/target/

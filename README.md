@@ -27,3 +27,21 @@ cd client
 npm ci
 npm run dev
 ```
+
+## Chạy bằng Docker Compose
+
+Từ thư mục gốc dự án:
+
+```bash
+cp .env.example .env
+docker compose up --build -d
+```
+
+- Client (Nginx): http://localhost:3000
+- Server (Spring Boot): http://localhost:8080
+- PostgreSQL: `localhost:5432`, database `carepath`
+- Request tới `/api/` qua client được chuyển tiếp sang server.
+
+Có thể đổi cổng và thông tin PostgreSQL trong `.env`; hãy đổi `POSTGRES_PASSWORD` trước khi triển khai ngoài máy cá nhân. Dữ liệu PostgreSQL được giữ trong Docker volume `postgres_data`. Dừng các container bằng `docker compose down` (không xóa volume).
+
+Hiện backend chưa có API và chưa có migration tạo bảng. Compose đặt `SPRING_JPA_HIBERNATE_DDL_AUTO=none`, nên database mới tạo vẫn rỗng; cần bổ sung migration trước khi dùng các entity. Docker build tạm bỏ qua biên dịch test vì `HelloControllerTest` cũ chưa tương thích với dependencies hiện tại.

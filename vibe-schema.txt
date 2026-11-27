@@ -263,6 +263,18 @@ Table QueueEntry {
   Note: 'Quản lý hàng đợi khám bệnh sau khi bệnh nhân check-in. Hỗ trợ đánh số thứ tự, gọi lượt, bỏ lượt và ưu tiên tiếp nhận.'
 }
 
+Table PlatformAdmin {
+  id String [pk, default: `uuid()`, note: 'Định danh quản trị viên nền tảng']
+  username String [not null, unique, note: 'Tên đăng nhập']
+  passwordHash String [not null, note: 'Mật khẩu đã băm']
+  fullName String [not null, note: 'Họ tên']
+  email String [note: 'Email']
+  status EntityStatus [not null, default: 'ACTIVE', note: 'Trạng thái tài khoản']
+  createdAt DateTime [not null, default: `now()`, note: 'Thời điểm tạo tài khoản']
+
+  Note: 'Quản trị viên cấp nền tảng (Super Admin). Quản lý toàn hệ thống: bậc phí, ngưỡng công nợ, xem mọi ví/phí/công nợ (BR-1802, BR-1807, BR-1905). Không thuộc bệnh viện nào.'
+}
+
 
 Table AppointmentStatusHistory {
   id BigInt [pk, increment, note: 'Định danh bản ghi lịch sử tự tăng']
@@ -499,8 +511,8 @@ Table WithdrawalRequest {
   bankName String [not null, note: 'Tên ngân hàng nhận tiền']
   accountHolder String [not null, note: 'Tên chủ tài khoản nhận tiền']
   status WithdrawalStatus [not null, default: 'PENDING', note: 'Trạng thái yêu cầu rút tiền']
-  requestedById String [ref: > HospitalStaff.id, note: 'Admin bệnh viện tạo yêu cầu']
-  approvedById String [ref: > HospitalStaff.id, note: 'Người phê duyệt (nếu cần)']
+  requestedById String [ref: > HospitalStaff.id, note: 'Admin bệnh viện tạo yêu cầu (BR-1903)']
+  approvedById String [ref: > PlatformAdmin.id, note: 'Super Admin phê duyệt yêu cầu rút']  // ← SỬA
   rejectionReason String [note: 'Lý do từ chối yêu cầu rút']
   requestedAt DateTime [not null, default: `now()`, note: 'Thời điểm tạo yêu cầu']
   processedAt DateTime [note: 'Thời điểm hoàn tất xử lý rút tiền']
@@ -524,6 +536,7 @@ Table MonthlyInvoice {
   totalRevenue Decimal [not null, note: 'Tổng doanh thu tính phí = onlineRevenue + counterRevenue']
   feeRatePct Decimal [not null, note: 'Tỷ lệ phí áp dụng theo bậc doanh thu (10–15%, BR-1802)']
   feeTierCode String [note: 'Mã bậc doanh thu áp dụng']
+  feeTierConfigId String [ref: > FeeTierConfig.id, note: 'Cấu hình bậc phí đã áp dụng cho kỳ này']  // ← THÊM
   feeAmount Decimal [not null, note: 'Số phí phải nộp của kỳ']
   status InvoiceStatus [not null, default: 'DRAFT', note: 'Trạng thái hóa đơn: nháp, đã phát hành, đã thanh toán, quá hạn...']
   dueDate DateTime [note: 'Hạn thanh toán hóa đơn']
@@ -531,6 +544,8 @@ Table MonthlyInvoice {
   paidFromWallet Boolean [not null, default: false, note: 'Hóa đơn được thanh toán bằng cách trừ từ ví hay chuyển khoản (BR-1806)']
   walletTransactionId String [ref: > WalletTransaction.id, note: 'Bút toán trừ ví tương ứng khi thanh toán bằng ví']
   debtAmount Decimal [not null, default: 0, note: 'Số phí còn nợ sau hạn (công nợ, BR-1806)']
+  generatedByType String [note: 'Loại nguồn tạo hóa đơn: SYSTEM_JOB, PLATFORM_ADMIN']  // ← THÊM
+  generatedById String [ref: > PlatformAdmin.id, note: 'Super Admin tạo thủ công (nếu có); NULL nếu do job hệ thống']  // ← THÊM
   createdAt DateTime [not null, default: `now()`, note: 'Thời điểm tạo hóa đơn (chốt cuối tháng)']
   updatedAt DateTime [not null, note: 'Thời điểm cập nhật gần nhất']
 
@@ -551,7 +566,7 @@ Table FeeTierConfig {
   effectiveFrom DateTime [not null, note: 'Thời điểm bắt đầu hiệu lực (chỉ áp dụng kỳ tính phí sau khi thay đổi, BR-1802)']
   effectiveTo DateTime [note: 'Thời điểm hết hiệu lực']
   status EntityStatus [not null, default: 'ACTIVE', note: 'Trạng thái cấu hình']
-  createdById String [ref: > HospitalStaff.id, note: 'Super Admin cấu hình bậc phí']
+  createdById String [ref: > PlatformAdmin.id, note: 'Super Admin cấu hình bậc phí (BR-1802)']  // ← SỬA
   createdAt DateTime [not null, default: `now()`, note: 'Thời điểm tạo cấu hình']
 
   indexes {
@@ -568,7 +583,7 @@ Table DebtAlertConfig {
   thresholdDays Int [note: 'Số ngày quá hạn để kích hoạt cảnh báo/công nợ']
   actionOnExceed DebtAction [not null, default: 'WARN_ONLY', note: 'Hành động khi vượt ngưỡng: chỉ cảnh báo, khóa rút ví, tạm dừng booking mới (BR-1808)']
   status EntityStatus [not null, default: 'ACTIVE', note: 'Trạng thái cấu hình']
-  createdById String [ref: > HospitalStaff.id, note: 'Super Admin cấu hình ngưỡng']
+  createdById String [ref: > PlatformAdmin.id, note: 'Super Admin cấu hình ngưỡng (BR-1807)']  // ← SỬA
   createdAt DateTime [not null, default: `now()`, note: 'Thời điểm tạo cấu hình']
 
   Note: 'Cấu hình ngưỡng cảnh báo công nợ phí (BR-1807). Khi vượt ngưỡng, hệ thống áp dụng biện pháp xử lý tương ứng (BR-1808), không tự động hủy lịch đã xác nhận (nhất quán BR-204).'

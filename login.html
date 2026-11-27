@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="form-action 'none'; connect-src 'none'; base-uri 'none'">
+  <title>Đăng nhập | CarePath</title>
+  <link rel="icon" type="image/svg+xml" href="./client/public/favicon.svg">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap">
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Be Vietnam Pro", system-ui, sans-serif;
+      color: #102e70;
+      background: #f5f8fc;
+      --blue: #1948a6;
+      --ink: #102e70;
+      --muted: #526582;
+      --line: #cdd9e9;
+      --tint: #eaf1ff;
+      --lime: #d7f06b;
+      --error: #a12135;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
+    a { color: inherit; text-underline-offset: .23em; }
+    button, input, select { font: inherit; }
+    button, summary { cursor: pointer; }
+    :focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+    ::selection { background: var(--lime); color: var(--ink); }
+    .icon { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .wrap { width: min(1120px, calc(100% - 64px)); margin-inline: auto; }
+    .skip { position: fixed; z-index: 2; top: 12px; left: 12px; padding: 12px; background: var(--lime); }
+    .skip:not(:focus) { clip-path: inset(50%); }
+    header { background: white; border-bottom: 1px solid var(--line); }
+    .top { min-height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .brand, .back { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; text-decoration: none; }
+    .brand { font-size: 21px; font-weight: 800; letter-spacing: -.035em; }
+    .brand-mark { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 11px 11px 11px 3px; color: white; background: var(--blue); }
+    .brand-mark .icon { stroke-width: 2.5; }
+    .back { font-size: 13px; font-weight: 700; color: var(--muted); }
+    .back:hover { color: var(--blue); text-decoration: underline; }
+    .back .icon { width: 17px; }
+    .entry { margin-block: clamp(30px, 4.5vh, 54px) 28px; display: grid; grid-template-columns: minmax(0, .78fr) minmax(0, 1fr); align-items: stretch; border: 1px solid var(--line); background: white; }
+    .work { grid-area: 1 / 2; padding: clamp(34px, 4vw, 52px) clamp(30px, 5.35vw, 80px); min-width: 0; }
+    h1 { margin: 26px 0 8px; font-size: clamp(30px, 3.2vw, 43px); line-height: 1.17; font-weight: 800; letter-spacing: -.04em; text-wrap: balance; }
+    .lede { margin: 0 0 22px; color: var(--muted); font-size: 14px; line-height: 1.65; }
+    .modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-bottom: 1px solid var(--line); }
+    .modes a { padding: 12px 10px 10px; min-height: 46px; display: grid; place-items: center; text-align: center; border-bottom: 3px solid transparent; text-decoration: none; color: var(--muted); font-size: 14px; font-weight: 700; }
+    .modes a:hover { background: #f5f8fc; }
+    .modes a[aria-current="true"] { background: var(--tint); color: var(--ink); border-color: var(--blue); }
+    .demo, .feedback { display: flex; align-items: flex-start; gap: 10px; padding: 11px 14px; background: var(--tint); font-size: 12px; line-height: 1.55; }
+    .demo { margin: 0 0 22px; color: var(--ink); }
+    .demo .icon, .feedback .icon { width: 17px; height: 17px; margin-top: 1px; }
+    .demo strong { font-weight: 800; }
+    form { display: grid; gap: 16px; }
+    #register-form { gap: 12px; }
+    label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 700; }
+    input, select { width: 100%; min-width: 0; min-height: 48px; padding: 9px 12px; border: 1px solid #8297b8; border-radius: 4px; background: white; color: var(--ink); caret-color: var(--blue); }
+    input::placeholder { color: var(--muted); }
+    input[aria-invalid="true"] { border-color: var(--error); }
+    input[type="date"] { display: block; }
+    .secret { position: relative; }
+    .secret input { padding-right: 53px; }
+    .reveal { position: absolute; inset: 2px 2px 2px auto; display: grid; place-items: center; width: 44px; padding: 0; border: 0; border-radius: 3px; background: white; color: var(--blue); }
+    .reveal:hover, .reveal[aria-pressed="true"] { background: var(--tint); }
+    .hint, .error { margin: 5px 0 0; font-size: 12px; line-height: 1.55; }
+    .hint { color: var(--muted); }
+    .error { color: var(--error); font-weight: 600; }
+    details { border-block: 1px solid var(--line); }
+    summary { min-height: 44px; padding: 12px 0; color: var(--blue); font-size: 13px; font-weight: 700; }
+    summary span { font-weight: 400; color: var(--muted); }
+    .profile { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; padding: 4px 0 16px; }
+    .submit { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 50px; padding: 12px 16px; border: 1px solid transparent; border-radius: 4px; color: var(--ink); background: var(--lime); font-size: 14px; font-weight: 800; text-align: left; }
+    .submit:not(:disabled):hover { background: #e7fa98; border-color: var(--ink); }
+    .submit:not(:disabled):active { background: #cbe656; }
+    .submit:disabled { background: var(--tint); color: var(--muted); cursor: not-allowed; }
+    .feedback { margin: 16px 0 0; background: #edf5d3; }
+    .side { grid-area: 1 / 1; position: relative; display: flex; flex-direction: column; align-items: flex-start; padding: clamp(32px, 4.5vw, 62px); min-width: 0; min-height: 550px; overflow: hidden; color: white; background: var(--blue); }
+    .side > :not(.map) { position: relative; }
+    .wayfinding-icon { display: flex; align-items: center; min-height: 38px; margin-bottom: 23px; color: var(--lime); }
+    .wayfinding-icon .icon { width: 33px; height: 33px; }
+    .side h2 { max-width: 12ch; margin: 0 0 14px; font-size: clamp(32px, 3.4vw, 47px); letter-spacing: -.04em; line-height: 1.14; font-weight: 800; text-wrap: balance; }
+    .side p { max-width: 32ch; margin: 0; color: #e2ebff; font-size: 14px; line-height: 1.7; }
+    .map { position: absolute; bottom: 0; right: 0; width: min(100%, 425px); height: auto; color: #acc6ff; pointer-events: none; }
+    .map-line { fill: none; stroke: currentColor; stroke-width: 1; opacity: .37; }
+    .directory { position: relative; width: min(100%, 258px); margin: auto 0 0; padding: 48px 0 0; list-style: none; }
+    .directory li { position: relative; display: flex; align-items: center; gap: 14px; min-height: 46px; color: #e2ebff; border-bottom: 1px solid #7396d9; font-size: 13px; font-weight: 500; }
+    .directory .marker { display: block; width: 9px; height: 9px; margin-inline: 3px; flex: none; border: 1px solid currentColor; border-radius: 50%; transition: background-color 200ms ease-out, border-color 200ms ease-out; }
+    .directory [data-active] { color: white; font-weight: 800; }
+    .directory [data-active] .marker { background: var(--lime); border-color: var(--lime); }
+    footer { margin-top: auto; }
+    .foot { display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; padding: 16px 0 23px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+    .foot strong { color: var(--ink); }
+    @media (max-width: 820px) {
+      .wrap { width: min(540px, calc(100% - 40px)); }
+      .entry { display: block; }
+      .work { padding: clamp(20px, 6vw, 38px); }
+      .side { display: none; }
+    }
+    @media (max-width: 450px) {
+      .wrap { width: calc(100% - 32px); }
+      .top { min-height: 64px; }
+      .entry { margin-block: 18px 22px; }
+      .brand { font-size: 18px; }
+      .brand-mark { width: 32px; height: 32px; }
+      .back { font-size: 12px; }
+      .profile { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .directory .marker { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" style="position:absolute">
+    <symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
+    <symbol id="left" viewBox="0 0 24 24"><path d="M20 12H4m6-6-6 6 6 6"/></symbol>
+    <symbol id="person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20v-1a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v1"/></symbol>
+    <symbol id="info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></symbol>
+    <symbol id="check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="eye" viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.5"/></symbol>
+    <symbol id="eye-off" viewBox="0 0 24 24"><path d="M3 3l18 18M10 6.2A12.5 12.5 0 0 1 12 6c6.5 0 10 6 10 6a15 15 0 0 1-3.2 3.4M6.2 7.7A16 16 0 0 0 2 12s3.5 6 10 6a12 12 0 0 0 3.5-.5"/></symbol>
+  </svg>
+
+  <a class="skip" id="skip" href="#main">Đến biểu mẫu</a>
+  <header>
+    <div class="wrap top">
+      <a class="brand" href="./client/" aria-label="CarePath, về trang chủ"><span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="#plus"/></svg></span>CarePath</a>
+      <a class="back" href="./client/"><svg class="icon" aria-hidden="true"><use href="#left"/></svg>Về trang chủ</a>
+    </div>
+  </header>
+
+  <main id="main" class="wrap entry" tabindex="-1">
+    <div class="work">
+      <nav class="modes" aria-label="Chế độ tài khoản">
+        <a id="nav-login" href="#dang-nhap" aria-current="true">Đăng nhập</a>
+        <a id="nav-register" href="#dang-ky">Đăng ký</a>
+      </nav>
+      <h1 id="page-title" tabindex="-1">Đăng nhập</h1>
+      <p id="intro" class="lede">Dùng tên đăng nhập và mật khẩu CarePath.</p>
+      <p class="demo" id="demo-note"><svg class="icon" aria-hidden="true"><use href="#info"/></svg><span><strong>Bản minh họa.</strong> Hãy dùng dữ liệu mẫu. Trang này không gửi hoặc lưu thông tin bạn nhập.</span></p>
+      <noscript><p>Hãy bật JavaScript để thử biểu mẫu. Không có dữ liệu nào được gửi.</p></noscript>
+
+      <form id="login-form" method="post" autocomplete="off" aria-labelledby="page-title" aria-describedby="demo-note" novalidate>
+        <div>
+          <label for="login-username">Tên đăng nhập</label>
+          <input id="login-username" name="username" required spellcheck="false" autocapitalize="none" aria-describedby="login-username-error">
+          <p class="error" id="login-username-error" hidden></p>
+        </div>
+        <div>
+          <label for="login-password">Mật khẩu</label>
+          <div class="secret">
+            <input id="login-password" name="password" type="password" required aria-describedby="login-password-error">
+            <button class="reveal" type="button" aria-label="Hiện mật khẩu" aria-pressed="false" aria-controls="login-password"><svg class="icon" aria-hidden="true"><use href="#eye"/></svg></button>
+          </div>
+          <p class="error" id="login-password-error" hidden></p>
+        </div>
+        <button class="submit" type="submit" disabled>Thử đăng nhập<svg class="icon" aria-hidden="true"><use href="#arrow"/></svg></button>
+      </form>
+
+      <form id="register-form" method="post" autocomplete="off" aria-labelledby="page-title" aria-describedby="demo-note" novalidate hidden>
+        <div>
+          <label for="full-name">Họ và tên</label>
+          <input id="full-name" name="fullName" required aria-describedby="full-name-error">
+          <p class="error" id="full-name-error" hidden></p>
+        </div>
+        <div>
+          <label for="register-username">Tên đăng nhập</label>
+          <input id="register-username" name="username" required spellcheck="false" autocapitalize="none" aria-describedby="username-hint register-username-error">
+          <p class="hint" id="username-hint">Tên đăng nhập của mỗi tài khoản là duy nhất. Bản mẫu không kiểm tra trùng tên.</p>
+          <p class="error" id="register-username-error" hidden></p>
+        </div>
+        <div>
+          <label for="register-password">Mật khẩu</label>
+          <div class="secret">
+            <input id="register-password" name="password" type="password" required minlength="8" aria-describedby="password-hint register-password-error">
+            <button class="reveal" type="button" aria-label="Hiện mật khẩu" aria-pressed="false" aria-controls="register-password"><svg class="icon" aria-hidden="true"><use href="#eye"/></svg></button>
+          </div>
+          <p class="hint" id="password-hint">Dùng ít nhất 8 ký tự cho mật khẩu mẫu.</p>
+          <p class="error" id="register-password-error" hidden></p>
+        </div>
+        <div>
+          <label for="confirm-password">Nhập lại mật khẩu</label>
+          <div class="secret">
+            <input id="confirm-password" type="password" required aria-describedby="confirm-password-error">
+            <button class="reveal" type="button" aria-label="Hiện mật khẩu nhập lại" aria-pressed="false" aria-controls="confirm-password"><svg class="icon" aria-hidden="true"><use href="#eye"/></svg></button>
+          </div>
+          <p class="error" id="confirm-password-error" hidden></p>
+        </div>
+        <details>
+          <summary>Thông tin hồ sơ <span>(không bắt buộc)</span></summary>
+          <div class="profile">
+            <div>
+              <label for="date-of-birth">Ngày sinh</label>
+              <input id="date-of-birth" name="dateOfBirth" type="date" aria-describedby="date-of-birth-error">
+              <p class="error" id="date-of-birth-error" hidden></p>
+            </div>
+            <div>
+              <label for="gender">Giới tính</label>
+              <select id="gender" name="gender">
+                <option value="">Chưa chọn</option><option>Nam</option><option>Nữ</option><option>Khác</option>
+              </select>
+            </div>
+            <div>
+              <label for="phone">Số điện thoại</label>
+              <input id="phone" name="phone" type="tel">
+            </div>
+            <div>
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" aria-describedby="email-error">
+              <p class="error" id="email-error" hidden></p>
+            </div>
+          </div>
+        </details>
+        <button class="submit" type="submit" disabled>Thử đăng ký<svg class="icon" aria-hidden="true"><use href="#arrow"/></svg></button>
+      </form>
+      <p class="feedback" id="feedback" tabindex="-1" hidden><svg class="icon" aria-hidden="true"><use href="#check"/></svg><span></span></p>
+    </div>
+
+    <aside class="side" aria-labelledby="side-title">
+      <svg class="map" viewBox="0 0 425 285" aria-hidden="true">
+        <path class="map-line" d="M110 285v-46a42 42 0 0 1 42-42h124a45 45 0 0 0 45-45V0M177 285v-16a28 28 0 0 1 28-28h98a67 67 0 0 0 67-67V0M245 285h84a88 88 0 0 0 88-88V0"/>
+        <circle cx="321" cy="52" r="6" fill="#1948a6" stroke="currentColor" stroke-opacity=".65"/>
+        <circle cx="370" cy="103" r="6" fill="#1948a6" stroke="currentColor" stroke-opacity=".65"/>
+      </svg>
+      <span class="wayfinding-icon"><svg class="icon" aria-hidden="true"><use href="#person"/></svg></span>
+      <h2 id="side-title">Không gian bệnh nhân</h2>
+      <p>Thử cách truy cập tài khoản CarePath trước khi quản lý hồ sơ và lịch khám.</p>
+      <ul class="directory" aria-hidden="true">
+        <li id="sign-login" data-active><span class="marker"></span>Đăng nhập</li>
+        <li id="sign-register"><span class="marker"></span>Đăng ký</li>
+      </ul>
+    </aside>
+  </main>
+
+  <footer><div class="wrap foot"><strong>CarePath</strong><span>Tìm và quản lý lịch khám tại nhiều bệnh viện</span></div></footer>
+
+  <script>
+    const byId = (id) => document.getElementById(id);
+    const login = byId('login-form');
+    const register = byId('register-form');
+    const feedback = byId('feedback');
+    const dob = byId('date-of-birth');
+    const today = new Date();
+    dob.max = [today.getFullYear(), today.getMonth() + 1, today.getDate()]
+      .map((part) => String(part).padStart(2, '0')).join('-');
+    byId('skip').addEventListener('click', (event) => {
+      event.preventDefault();
+      byId('main').focus();
+    });
+
+    function setVisibility(button, visible) {
+      byId(button.getAttribute('aria-controls')).type = visible ? 'text' : 'password';
+      button.setAttribute('aria-pressed', String(visible));
+      button.querySelector('use').setAttribute('href', visible ? '#eye-off' : '#eye');
+    }
+
+    document.querySelectorAll('.reveal').forEach((button) => {
+      button.addEventListener('click', () => setVisibility(button, button.getAttribute('aria-pressed') !== 'true'));
+    });
+
+    function setError(field, message) {
+      const error = byId(`${field.id}-error`);
+      if (!error) return;
+      error.textContent = message;
+      error.hidden = !message;
+      if (message) field.setAttribute('aria-invalid', 'true');
+      else field.removeAttribute('aria-invalid');
+    }
+
+    function showMode(focusTitle = false) {
+      const isRegister = location.hash === '#dang-ky';
+      const title = isRegister ? 'Đăng ký' : 'Đăng nhập';
+      if (login.hidden !== isRegister) {
+        const leaving = isRegister ? login : register;
+        leaving.querySelectorAll('input').forEach((field) => setError(field, ''));
+        leaving.querySelectorAll('.reveal').forEach((button) => {
+          setVisibility(button, false);
+          byId(button.getAttribute('aria-controls')).value = '';
+        });
+      }
+      login.hidden = isRegister;
+      register.hidden = !isRegister;
+      byId('nav-login').setAttribute('aria-current', String(!isRegister));
+      byId('nav-register').setAttribute('aria-current', String(isRegister));
+      byId('sign-login').toggleAttribute('data-active', !isRegister);
+      byId('sign-register').toggleAttribute('data-active', isRegister);
+      byId('page-title').textContent = title;
+      byId('intro').textContent = isRegister
+        ? 'Nhập họ tên và chọn tên đăng nhập cho tài khoản.'
+        : 'Dùng tên đăng nhập và mật khẩu CarePath.';
+      document.title = `${title} | CarePath`;
+      feedback.hidden = true;
+      if (focusTitle) byId('page-title').focus({ preventScroll: true });
+    }
+
+    window.addEventListener('hashchange', (event) => {
+      const hash = new URL(event.newURL).hash;
+      if (hash !== '#main') showMode(true);
+    });
+    showMode();
+
+    const requiredMessage = {
+      fullName: 'Vui lòng nhập họ và tên.',
+      username: 'Vui lòng nhập tên đăng nhập.',
+      password: 'Vui lòng nhập mật khẩu.',
+    };
+
+    function validate(field) {
+      const empty = field.name === 'password' || field.id === 'confirm-password' ? !field.value : !field.value.trim();
+      if (field.required && empty) return requiredMessage[field.name] || 'Vui lòng nhập lại mật khẩu.';
+      if (field.id === 'register-password' && field.value.length < 8) return 'Nhập ít nhất 8 ký tự.';
+      if (field.id === 'confirm-password' && field.value !== byId('register-password').value) return 'Mật khẩu nhập lại không khớp.';
+      if (field.validity.typeMismatch) return 'Nhập email theo dạng ten@vidu.vn.';
+      if (field === dob && (field.validity.badInput || field.validity.rangeOverflow)) return 'Nhập ngày sinh hợp lệ, không sau hôm nay.';
+      return '';
+    }
+
+    [login, register].forEach((form) => {
+      form.addEventListener('input', (event) => {
+        setError(event.target, '');
+        if (event.target.id === 'register-password') setError(byId('confirm-password'), '');
+        feedback.hidden = true;
+      });
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        feedback.hidden = true;
+        let firstInvalid;
+        form.querySelectorAll('input').forEach((field) => {
+          const message = validate(field);
+          setError(field, message);
+          if (message && !firstInvalid) firstInvalid = field;
+        });
+        if (firstInvalid) {
+          const details = firstInvalid.closest('details');
+          if (details) details.open = true;
+          firstInvalid.focus();
+          return;
+        }
+        form.reset();
+        form.querySelectorAll('.reveal').forEach((button) => setVisibility(button, false));
+        form.querySelectorAll('details').forEach((details) => { details.open = false; });
+        feedback.querySelector('span').textContent = form === register
+          ? 'Biểu mẫu hợp lệ. Không có tài khoản nào được tạo trong bản minh họa.'
+          : 'Biểu mẫu hợp lệ. Bạn chưa đăng nhập vì đây là bản minh họa.';
+        feedback.hidden = false;
+        feedback.focus();
+      });
+      form.querySelector('.submit').disabled = false;
+    });
+  </script>
+</body>
+</html>

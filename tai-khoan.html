@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Không gian bệnh nhân | CarePath</title>
+  <link rel="icon" type="image/svg+xml" href="./client/public/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { font-family: "Be Vietnam Pro", sans-serif; color: #142b52; background: #f5f8fc; font-synthesis: none; }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; line-height: 1.65; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button { font: inherit; cursor: pointer; }
+    a { color: inherit; text-underline-offset: 4px; }
+    :focus-visible { outline: 3px solid #e4ab19; outline-offset: 3px; }
+    ::selection { background: #d7f06b; color: #102e70; }
+    .skip { position: fixed; top: -90px; left: 16px; z-index: 100; background: #d7f06b; padding: 10px 16px; font-weight: 700; }
+    .skip:focus { top: 12px; }
+    .icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+    .shell { max-width: 1400px; margin: auto; padding: 0 clamp(20px, 4vw, 64px); }
+    .topbar { background: #fff; border-bottom: 1px solid #cdd9e9; }
+    .topbar-inner { min-height: 76px; display: flex; align-items: center; gap: 20px; }
+    .brand { display: inline-flex; align-items: center; gap: 11px; color: #102e70; text-decoration: none; font-size: 21px; font-weight: 800; letter-spacing: -.035em; }
+    .brand-mark { display: grid; place-items: center; width: 36px; height: 36px; background: #1747a6; border-radius: 11px 11px 11px 3px; color: white; }
+    .brand-mark .icon { stroke-width: 3; }
+    .topnav { margin-left: auto; display: flex; align-items: center; gap: 20px; }
+    .topnav a { color: #526582; font-size: 13px; font-weight: 700; text-decoration: none; }
+    .topnav a:hover { color: #1747a6; }
+    .top-actions { display: flex; gap: 10px; margin-left: 16px; align-items: center; }
+    .icon-button { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid #cdd9e9; color: #102e70; background: #fff; text-decoration: none; }
+    .icon-button:hover, .icon-button[aria-current="page"], .icon-button[aria-expanded="true"] { border-color: #1747a6; background: #dce8ff; }
+    .logout-button { display: inline-flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 10px 14px; border: 0; background: transparent; color: #526582; font-size: 13px; font-weight: 700; text-align: left; transition: background-color .18s ease, color .18s ease; }
+    .logout-button:hover { background: #f0f5ff; color: #1747a6; }
+    .logout-button:active { background: #dce8ff; color: #102e70; }
+    .logout-button .icon { width: 18px; height: 18px; }
+    .logout-feedback[hidden] { display: none; }
+    .logout-feedback { margin: -12px 0 28px; padding: 12px 16px; border: 1px solid #cdd9e9; background: #fff; color: #102e70; font-size: 13px; }
+    .notification-wrap { position: relative; }
+    .notification-panel { position: absolute; right: 0; top: calc(100% + 12px); width: min(340px, calc(100vw - 40px)); z-index: 20; padding: 22px; background: white; border: 1px solid #cdd9e9; box-shadow: 10px 18px 34px #0002; }
+    .notification-panel[hidden], .view[hidden] { display: none; }
+    .notification-panel h2 { margin: 0 0 10px; font-size: 17px; color: #102e70; }
+    .notification-panel p { margin: 0; color: #526582; font-size: 13px; }
+    .notification-panel ul { list-style: none; padding: 0; margin: 10px 0 0; }
+    .notification-panel li { padding: 12px 0; border-top: 1px solid #cdd9e9; font-size: 13px; line-height: 1.6; }
+    .notification-panel li strong, .notification-panel li span { display: block; }
+    .notification-panel li span { margin-top: 3px; color: #526582; }
+    main { padding-top: clamp(32px, 5vw, 62px) !important; padding-bottom: 48px !important; }
+    #tai-khoan { scroll-margin-top: 140px; }
+    .page-title { margin: 0 0 8px; color: #102e70; font-size: clamp(28px, 3vw, 42px); letter-spacing: -.035em; line-height: 1.28; }
+    .intro { margin: 0; color: #526582; font-size: 15px; }
+    .preview-note { margin: 28px 0 32px; padding: 14px 18px; background: #dce8ff; color: #142b52; font-size: 13px; }
+    .section-title { margin: 0 0 8px; font-size: clamp(21px, 2vw, 27px); line-height: 1.35; color: #102e70; letter-spacing: -.025em; }
+    .section-copy { margin: 0 0 24px; color: #526582; font-size: 14px; }
+    .service-list { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 8px; border: 1px solid #cdd9e9; background: white; }
+    .service { min-height: 305px; padding: clamp(24px, 2.8vw, 38px); display: flex; flex-direction: column; align-items: flex-start; border-right: 1px solid #cdd9e9; }
+    .service:last-child { border-right: 0; }
+    .service-icon { display: grid; place-items: center; width: 36px; height: 36px; color: #1747a6; }
+    .service-icon .icon { width: 27px; height: 27px; }
+    .service h3 { margin: 28px 0 10px; font-size: 19px; line-height: 1.4; color: #102e70; }
+    .service p { margin: 0 0 28px; color: #526582; font-size: 13px; }
+    .service a { margin-top: auto; display: inline-flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 800; color: #1747a6; text-decoration: none; }
+    .service a:hover { text-decoration: underline; }
+    .service a .icon { width: 17px; height: 17px; }
+    .booking-strip { margin-top: 26px; display: flex; align-items: center; justify-content: space-between; gap: 24px; background: #1747a6; padding: clamp(24px, 3vw, 38px); color: white; }
+    .booking-strip h2 { margin: 0 0 8px; font-size: clamp(19px, 2vw, 25px); }
+    .booking-strip p { margin: 0; max-width: 63ch; font-size: 13px; color: #e2ebff; }
+    .primary-link { display: inline-flex; align-items: center; justify-content: center; gap: 12px; flex: none; min-height: 48px; padding: 12px 18px; background: #d7f06b; color: #102e70; font-size: 13px; font-weight: 800; text-decoration: none; }
+    .primary-link:hover { background: #fff; }
+    .primary-link .icon { width: 18px; height: 18px; }
+    .profile-layout { display: grid; grid-template-columns: minmax(220px, .7fr) minmax(0, 1.5fr); gap: 24px; align-items: start; }
+    .account-side { display: grid; gap: 20px; min-width: 0; }
+    .profile-card, .appointments { background: white; border: 1px solid #cdd9e9; }
+    .appointments { padding-bottom: 8px; }
+    .profile-card { padding: 28px; }
+    .profile-avatar { display: grid; place-items: center; width: 36px; height: 36px; color: #1747a6; }
+    .profile-card h2 { margin: 24px 0 7px; font-size: 20px; color: #102e70; }
+    .profile-card p { margin: 0 0 18px; color: #526582; font-size: 13px; }
+    .profile-details { margin: 0; }
+    .profile-details div { padding: 12px 0; border-top: 1px solid #cdd9e9; }
+    .profile-details dt { color: #526582; font-size: 12px; }
+    .profile-details dd { margin: 3px 0 0; color: #102e70; font-size: 14px; font-weight: 700; overflow-wrap: anywhere; }
+    .profile-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-top: 24px; }
+    .profile-heading h2 { margin: 0 0 7px; }
+    .text-action { padding: 3px 0; border: 0; background: none; color: #1747a6; font-size: 13px; font-weight: 700; text-decoration: underline; }
+    .profile-form { display: grid; gap: 14px; margin-top: 15px; }
+    .profile-form label { display: grid; gap: 6px; color: #526582; font-size: 12px; font-weight: 700; }
+    .profile-form input { width: 100%; min-height: 44px; padding: 9px 11px; border: 1px solid #aabbd4; border-radius: 0; background: #fff; color: #142b52; font: inherit; font-size: 13px; }
+    .form-actions, .cancel-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+    .form-actions button, .cancel-actions button { min-height: 42px; padding: 9px 13px; border: 1px solid #1747a6; background: #fff; color: #1747a6; font-size: 12px; font-weight: 700; }
+    .form-actions button[type="submit"] { background: #1747a6; color: #fff; }
+    .form-actions button[type="submit"]:hover { background: #102e70; }
+    .settings-panel { padding: 24px 28px; border: 1px solid #cdd9e9; background: #fff; }
+    .settings-panel h2 { margin: 0 0 8px; color: #102e70; font-size: 20px; }
+    .settings-panel p { margin: 0 0 16px; color: #526582; font-size: 12px; }
+    .setting { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 0; border-top: 1px solid #cdd9e9; cursor: pointer; }
+    .setting span { display: grid; gap: 4px; }
+    .setting strong { color: #102e70; font-size: 13px; }
+    .setting small { color: #526582; font-size: 12px; line-height: 1.5; }
+    .setting input { width: 20px; height: 20px; flex: none; accent-color: #1747a6; cursor: pointer; }
+    .settings-panel .settings-footnote { margin: 12px 0 0; }
+    .status { display: inline-block; padding: 7px 10px; background: #dce8ff; color: #526582; font-size: 11px; font-weight: 700; }
+    .appointments-head { padding: 26px 28px 0; }
+    .appointments-head h2 { margin: 0 0 5px; font-size: 20px; color: #102e70; }
+    .appointments-head p { margin: 0 0 18px; color: #526582; font-size: 13px; }
+    .tabs { display: flex; gap: 28px; padding: 0 28px; border-bottom: 1px solid #cdd9e9; }
+    .tab { padding: 11px 0 13px; border: 0; border-bottom: 3px solid transparent; background: transparent; color: #526582; font-size: 13px; font-weight: 700; }
+    .tab[aria-selected="true"] { border-bottom-color: #1747a6; color: #1747a6; }
+    .empty { min-height: 260px; padding: 38px 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+    .empty .service-icon { width: 36px; height: 36px; }
+    .empty h3 { margin: 18px 0 6px; font-size: 17px; color: #102e70; }
+    .empty p { margin: 0; max-width: 43ch; color: #526582; font-size: 13px; }
+    .empty a { margin-top: 18px; font-size: 13px; font-weight: 800; color: #1747a6; }
+    .appointment-list { list-style: none; padding: 8px 28px 26px; margin: 0; }
+    .appointment-list li { padding: 18px 0; border-bottom: 1px solid #cdd9e9; }
+    .appointment-list li:last-child { border-bottom: 0; }
+    .appointment-title { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 8px 12px; }
+    .appointment-title strong { color: #102e70; font-size: 15px; }
+    .appointment-state { padding: 5px 9px; background: #dce8ff; color: #102e70; font-size: 11px; font-weight: 700; }
+    .appointment-state.waiting { background: #fff1d8; color: #704512; }
+    .appointment-state.cancelled { background: #f2f3f6; color: #526582; }
+    .appointment-list p { margin: 6px 0 0; color: #526582; font-size: 13px; }
+    .appointment-list time { color: #1747a6; font-weight: 700; }
+    .cancel-action { min-height: 40px; margin-top: 10px; padding: 6px 0; border: 0; background: none; color: #1747a6; font-size: 13px; font-weight: 700; text-decoration: underline; }
+    .cancel-confirm { margin-top: 14px; padding: 16px; background: #f5f8fc; }
+    .cancel-confirm p { margin: 0 0 12px; color: #142b52; font-size: 13px; }
+    .cancel-actions .confirm-cancel { border-color: #a33131; background: #a33131; color: #fff; }
+    .cancel-actions .confirm-cancel:hover { background: #7f2424; }
+    .appointment-note { margin: 0 28px 24px; color: #526582; font-size: 12px; }
+    .account-feedback { display: flex; align-items: start; justify-content: space-between; gap: 16px; margin: 16px 24px 0; padding: 13px 18px; border: 1px solid #1747a6; background: #fff; color: #102e70; font-size: 13px; }
+    .account-feedback button { flex: none; min-width: 30px; min-height: 30px; padding: 0; border: 0; background: transparent; color: #102e70; font-size: 20px; }
+    .account-layout { display: grid; grid-template-columns: minmax(240px, 280px) minmax(0, 1fr); gap: 28px; align-items: start; }
+    .account-choices { min-width: 0; padding: 20px 12px 12px; border: 1px solid #cdd9e9; background: #fff; }
+    .account-side-heading { margin: 0 12px 4px; color: #102e70; font-size: 16px; line-height: 1.4; }
+    .account-side-copy { margin: 0 12px 20px; color: #526582; font-size: 12px; line-height: 1.5; }
+    .account-choice-list { display: grid; gap: 4px; }
+    .account-choice { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 52px; padding: 12px 14px; border: 0; background: transparent; color: #142b52; text-align: left; transition: background-color .18s ease, color .18s ease; }
+    .account-choice:hover { background: #f0f5ff; color: #1747a6; }
+    .account-choice[aria-current="true"], .account-choice[aria-current="true"]:hover { background: #1747a6; color: #fff; }
+    .account-choice .icon { width: 20px; height: 20px; color: #1747a6; }
+    .account-choice[aria-current="true"] .icon { color: #fff; }
+    .account-choice strong { font-size: 13px; line-height: 1.5; }
+    .account-side-footer { margin-top: 20px; padding-top: 8px; border-top: 1px solid #cdd9e9; }
+    .account-content { min-width: 0; }
+    .account-content > .profile-card, .account-content > .settings-panel { min-height: 340px; }
+    .footer { padding: 22px 0; border-top: 1px solid #cdd9e9; color: #526582; font-size: 12px; }
+    @media (max-width: 1150px) { .service-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } .service:nth-child(2n) { border-right: 0; } .service:nth-child(-n+2) { border-bottom: 1px solid #cdd9e9; } }
+    @media (max-width: 850px) { .service-list { grid-template-columns: 1fr; } .service { min-height: 0; border-right: 0; border-bottom: 1px solid #cdd9e9; } .service:last-child { border-bottom: 0; } .service h3 { margin-top: 18px; } .profile-layout { grid-template-columns: 1fr; } }
+    @media (max-width: 600px) { .profile-card, .settings-panel { padding: 22px 20px; } .appointment-list { padding-right: 20px; padding-left: 20px; } .appointment-title { flex-wrap: wrap; } .cancel-actions { flex-direction: column; } .cancel-actions button { width: 100%; } }
+    @media (min-width: 701px) { .account-choices { position: sticky; top: 24px; } }
+    @media (max-width: 700px) { .account-layout { grid-template-columns: 1fr; gap: 16px; } .account-choices { padding-top: 16px; } .account-side-copy { margin-bottom: 12px; } .account-side-footer { margin-top: 12px; } }
+    @media (max-width: 600px) { .topbar-inner { min-height: 68px; gap: 10px; padding-inline: 16px; } .topnav { display: none; } .top-actions { margin-left: auto; gap: 8px; } .booking-strip { flex-direction: column; align-items: flex-start; } .primary-link { width: 100%; } .preview-note { margin: 22px 0 28px; } }
+    @media (max-width: 360px) { .brand { gap: 7px; font-size: 18px; } .brand-mark { width: 32px; height: 32px; } .top-actions { gap: 5px; } .icon-button { width: 40px; height: 40px; } }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .logout-button { transition: none; } }
+  </style>
+</head>
+<body>
+  <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="1"/><path d="M7 3v4m10-4v4M3 10h18m-12 5h6"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-building" viewBox="0 0 24 24"><path d="M4 21V5l8-3 8 3v16M2 21h20M9 8h1m4 0h1m-6 4h1m4 0h1m-5 9v-5h4v5"/></symbol>
+    <symbol id="i-doctor" viewBox="0 0 24 24"><path d="M5 3v7a6 6 0 0 0 12 0V3M5 3H3v5m14-5h2v5M11 16v2a3 3 0 0 0 6 0v-2"/><circle cx="18" cy="14" r="2"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M10 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5M13 8l4 4-4 4m4-4H8"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5 5 19"/></symbol>
+  </svg>
+  <a class="skip" href="#main">Đi đến nội dung chính</a>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="./client/" aria-label="CarePath, về trang chủ"><span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></span>CarePath</a>
+      <nav class="topnav" aria-label="Điều hướng"><a href="#tong-quan" data-view-link="dashboard">Dịch vụ đặt lịch</a><a href="./client/">Về CarePath</a></nav>
+      <div class="top-actions">
+        <div class="notification-wrap"><button class="icon-button" id="notifications-button" type="button" aria-label="Thông báo" aria-expanded="false" aria-controls="notifications-panel"><svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg></button><div class="notification-panel" id="notifications-panel" hidden><h2>Thông báo mẫu</h2><p>Chỉ để minh họa giao diện; không có thông báo nào được gửi.</p><ul><li><strong>Lịch hẹn mẫu đã được xác nhận</strong><span>Khám Nội tổng quát · 25/11/2026 tại Bệnh viện Minh họa A.</span></li><li><strong>Nhắc lịch tiếp nhận dự kiến</strong><span>Khung 08:00–09:00 là thời gian dự kiến tiếp nhận, không phải giờ bắt đầu khám.</span></li></ul></div></div>
+        <a class="icon-button" href="#tai-khoan" id="profile-link" aria-label="Thông tin tài khoản và lịch hẹn" title="Thông tin tài khoản và lịch hẹn"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg></a>
+      </div>
+    </div>
+  </header>
+  <main id="main" class="shell">
+    <section id="tong-quan" class="view" aria-labelledby="dashboard-heading">
+      <h1 class="page-title" id="dashboard-heading">Bạn muốn đặt lịch khám như thế nào?</h1>
+      <p class="intro">Bắt đầu từ điều bạn đã biết, rồi chọn khung tiếp nhận phù hợp với mình.</p>
+      <p class="preview-note"><strong>Giao diện minh họa.</strong> Tên, lịch hẹn và thông báo trong phần tài khoản là dữ liệu mẫu, không thuộc bệnh nhân hay bệnh viện thực tế. Chưa kết nối lịch trống; các lối tìm kiếm dẫn đến phần giới thiệu quy trình đặt lịch.</p>
+      <p class="logout-feedback" id="logout-feedback" role="status" hidden>Bạn đã rời phần tài khoản minh họa. Không có phiên đăng nhập thật để đăng xuất.</p>
+      <h2 class="section-title">Các cách tìm lịch khám</h2>
+      <p class="section-copy">Bạn có thể bắt đầu từ bệnh viện, nhu cầu khám, bác sĩ (nếu được hỗ trợ) hoặc thời gian thuận tiện.</p>
+      <div class="service-list">
+        <article class="service"><span class="service-icon"><svg class="icon" aria-hidden="true"><use href="#i-building"/></svg></span><h3>Tìm theo bệnh viện</h3><p>Khám phá nơi bạn muốn đến và các lựa chọn đặt lịch mà bệnh viện cung cấp.</p><a href="./client/#tim-kiem">Xem cách tìm <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></article>
+        <article class="service"><span class="service-icon"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg></span><h3>Tìm theo nhu cầu khám</h3><p>Bắt đầu từ chuyên khoa hoặc dịch vụ phù hợp với nhu cầu của bạn.</p><a href="./client/#cach-dat-lich">Xem lựa chọn <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></article>
+        <article class="service"><span class="service-icon"><svg class="icon" aria-hidden="true"><use href="#i-doctor"/></svg></span><h3>Tìm theo bác sĩ</h3><p>Tìm bác sĩ tại bệnh viện có hỗ trợ lựa chọn bác sĩ khi đặt lịch khám.</p><a href="./client/#cach-dat-lich">Xem cách tìm <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></article>
+        <article class="service"><span class="service-icon"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg></span><h3>Tìm khung tiếp nhận</h3><p>Hiểu cách chọn khoảng thời gian tiếp nhận dự kiến, không phải giờ bắt đầu khám.</p><a href="./client/#khung-gio">Tìm hiểu khung giờ <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></article>
+      </div>
+      <aside class="booking-strip"><div><h2>Sẵn sàng tìm lịch khám?</h2><p>Chọn bệnh viện hoặc dịch vụ phù hợp. Khung giờ hiển thị là khoảng tiếp nhận dự kiến và phụ thuộc vào lịch của từng bệnh viện.</p></div><a class="primary-link" href="./client/#tim-kiem">Khám phá cách đặt lịch <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></aside>
+    </section>
+    <section id="tai-khoan" class="view" aria-labelledby="account-heading" hidden>
+      <h1 class="page-title" id="account-heading">Thông tin tài khoản</h1>
+      <p class="intro">Quản lý lịch hẹn, thông tin cá nhân và cách bạn nhận thông báo.</p>
+      <p class="preview-note"><strong>Dữ liệu mẫu.</strong> Tài khoản Nguyễn Minh Anh và các bệnh viện bên dưới hoàn toàn hư cấu. Chưa có đăng nhập hay kết nối bệnh viện; mọi thay đổi chỉ có hiệu lực trong trang đang mở.</p>
+      <div class="account-layout">
+        <aside class="account-choices" aria-label="Danh mục tài khoản">
+          <h2 class="account-side-heading">Khu vực tài khoản</h2>
+          <p class="account-side-copy">Chọn thông tin bạn muốn xem</p>
+          <nav class="account-choice-list" aria-label="Chọn nội dung tài khoản">
+            <button class="account-choice" type="button" data-account-panel="appointments" aria-controls="account-appointments" aria-current="true"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg><strong>Lịch hẹn của tôi</strong></button>
+            <button class="account-choice" type="button" data-account-panel="profile" aria-controls="account-profile"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><strong>Thông tin cá nhân</strong></button>
+            <button class="account-choice" type="button" data-account-panel="settings" aria-controls="account-settings"><svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg><strong>Cài đặt thông báo</strong></button>
+          </nav>
+          <div class="account-side-footer"><button class="logout-button" id="logout-button" type="button"><svg class="icon" aria-hidden="true"><use href="#i-logout"/></svg><span>Đăng xuất</span></button></div>
+        </aside>
+        <div class="account-content">
+          <p class="account-feedback" id="account-feedback" role="status" hidden><span id="account-feedback-text"></span><button id="dismiss-account-feedback" type="button" aria-label="Đóng thông báo">×</button></p>
+          <section class="profile-card" id="account-profile" aria-labelledby="personal-heading" hidden>
+            <span class="profile-avatar"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg></span>
+            <div class="profile-heading"><h2 id="personal-heading">Thông tin cá nhân</h2><button class="text-action" id="edit-profile" type="button">Chỉnh sửa</button></div>
+            <p>Hồ sơ giả lập để xem bố cục tài khoản.</p>
+            <dl class="profile-details" id="profile-details"><div><dt>Họ và tên</dt><dd id="profile-name">Nguyễn Minh Anh (mẫu)</dd></div><div><dt>Email</dt><dd id="profile-email">minh.anh@example.com</dd></div><div><dt>Số điện thoại</dt><dd id="profile-phone">0900 000 000</dd></div></dl>
+            <form class="profile-form" id="profile-form" autocomplete="off" hidden>
+              <label>Họ và tên<input name="name" required maxlength="100" value="Nguyễn Minh Anh (mẫu)"></label>
+              <label>Email<input name="email" type="email" required maxlength="150" value="minh.anh@example.com"></label>
+              <label>Số điện thoại<input name="phone" type="tel" required pattern="[0-9 +().-]{9,20}" title="Nhập từ 9 đến 20 ký tự số hoặc dấu +, dấu cách, dấu ngoặc, dấu chấm, dấu gạch ngang" value="0900 000 000"></label>
+              <div class="form-actions"><button id="discard-profile" type="button">Bỏ qua</button><button type="submit">Lưu thay đổi mẫu</button></div>
+            </form>
+            <span class="status">Tài khoản minh họa</span>
+          </section>
+          <section class="settings-panel" id="account-settings" aria-labelledby="settings-heading" hidden>
+            <h2 id="settings-heading">Cài đặt thông báo</h2>
+            <p>Tùy chọn mẫu chỉ áp dụng trong trang này. Hiện chưa có thông báo nào được gửi.</p>
+            <label class="setting"><span><strong>Nhắc lịch hẹn</strong><small>Thông báo trước khung tiếp nhận dự kiến.</small></span><input type="checkbox" checked></label>
+            <label class="setting"><span><strong>Thay đổi lịch hẹn</strong><small>Cập nhật khi lịch hẹn có thay đổi quan trọng.</small></span><input type="checkbox" checked></label>
+            <p class="settings-footnote">Những thay đổi quan trọng về lịch hẹn vẫn cần được thông báo khi hệ thống chính thức hoạt động, tùy chính sách và kênh liên hệ của bệnh viện.</p>
+          </section>
+        <section class="appointments" id="account-appointments" aria-labelledby="appointments-heading">
+          <div class="appointments-head"><h2 id="appointments-heading">Lịch hẹn của tôi</h2><p>Theo dõi khung tiếp nhận dự kiến tại từng bệnh viện.</p></div>
+          <div class="tabs" role="tablist" aria-label="Loại lịch hẹn"><button class="tab" id="upcoming-tab" type="button" role="tab" aria-selected="true" aria-controls="upcoming-panel">Sắp tới</button><button class="tab" id="history-tab" type="button" role="tab" aria-selected="false" aria-controls="history-panel" tabindex="-1">Đã qua &amp; đã hủy</button></div>
+          <div id="upcoming-panel" role="tabpanel" aria-labelledby="upcoming-tab" tabindex="0">
+            <ul class="appointment-list" id="upcoming-list">
+              <li><div class="appointment-title"><strong>Khám Nội tổng quát</strong><span class="appointment-state">Đã xác nhận · mẫu</span></div><p>Bệnh viện Minh họa A</p><p><time datetime="2026-11-25T08:00">25/11/2026 · 08:00–09:00</time> · Khung tiếp nhận dự kiến</p></li>
+              <li id="waiting-appointment"><div class="appointment-title"><strong>Tư vấn chuyên khoa Tim mạch</strong><span class="appointment-state waiting" id="waiting-status">Chờ tiếp nhận · mẫu</span></div><p>Bệnh viện Minh họa B</p><p><time datetime="2026-12-03T14:00">03/12/2026 · 14:00–15:00</time> · Khung tiếp nhận dự kiến</p><button class="cancel-action" id="request-cancel" type="button" aria-expanded="false" aria-controls="cancel-confirm">Hủy lịch hẹn mẫu</button>
+                <div class="cancel-confirm" id="cancel-confirm" hidden><p>Hủy lịch mẫu <strong>CP-260135</strong>? Thao tác này chỉ thay đổi trạng thái trong bản xem thử, không gửi yêu cầu đến bệnh viện. Khi kết nối thực tế, việc hủy phụ thuộc chính sách từng bệnh viện.</p><div class="cancel-actions"><button id="keep-appointment" type="button">Giữ lịch</button><button class="confirm-cancel" id="confirm-cancel" type="button">Xác nhận hủy lịch mẫu</button></div></div>
+              </li>
+            </ul>
+            <p class="appointment-note">Khung giờ không phải cam kết thời điểm bắt đầu khám. Các lịch này không có hiệu lực đặt khám.</p>
+          </div>
+          <div id="history-panel" role="tabpanel" aria-labelledby="history-tab" tabindex="0" hidden><ul class="appointment-list" id="history-list"><li><div class="appointment-title"><strong>Khám chuyên khoa Da liễu</strong><span class="appointment-state">Đã hoàn tất · mẫu</span></div><p>Bệnh viện Minh họa A</p><p><time datetime="2026-11-12T09:00">12/11/2026 · 09:00–10:00</time> · Khung tiếp nhận mẫu</p></li></ul><p class="appointment-note">Các lịch ở đây chỉ là dữ liệu minh họa.</p></div>
+        </section>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="shell footer">© CarePath · Không gian bệnh nhân</footer>
+  <script>
+    const views = { dashboard: document.getElementById('tong-quan'), account: document.getElementById('tai-khoan') };
+    const profileLink = document.getElementById('profile-link');
+    const logoutButton = document.getElementById('logout-button');
+    const logoutFeedback = document.getElementById('logout-feedback');
+    const notificationButton = document.getElementById('notifications-button');
+    const notificationPanel = document.getElementById('notifications-panel');
+    const accountPanels = { appointments: document.querySelector('.appointments'), profile: document.querySelector('.profile-card'), settings: document.querySelector('.settings-panel') };
+    function showAccountPanel(panel) {
+      Object.entries(accountPanels).forEach(([name, element]) => { element.hidden = name !== panel; });
+      document.querySelectorAll('.account-choices [data-account-panel]').forEach(button => {
+        if (button.dataset.accountPanel === panel) button.setAttribute('aria-current', 'true');
+        else button.removeAttribute('aria-current');
+      });
+      document.getElementById('account-feedback').hidden = true;
+    }
+    document.querySelectorAll('.account-choices [data-account-panel]').forEach(button => {
+      button.addEventListener('click', () => showAccountPanel(button.dataset.accountPanel));
+    });
+    function showView() {
+      const account = location.hash === '#tai-khoan';
+      views.dashboard.hidden = account;
+      views.account.hidden = !account;
+      if (account) profileLink.setAttribute('aria-current', 'page'); else profileLink.removeAttribute('aria-current');
+      document.title = (account ? 'Thông tin tài khoản' : 'Dịch vụ đặt lịch') + ' | CarePath';
+      window.scrollTo(0, 0);
+    }
+    window.addEventListener('hashchange', showView);
+    showView();
+    logoutButton.addEventListener('click', () => {
+      logoutFeedback.hidden = false;
+      location.hash = '#tong-quan';
+    });
+    function closeNotifications() { notificationPanel.hidden = true; notificationButton.setAttribute('aria-expanded', 'false'); }
+    notificationButton.addEventListener('click', () => { notificationPanel.hidden = !notificationPanel.hidden; notificationButton.setAttribute('aria-expanded', String(!notificationPanel.hidden)); });
+    document.addEventListener('click', event => { if (!event.target.closest('.notification-wrap')) closeNotifications(); });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape' && !notificationPanel.hidden) { closeNotifications(); notificationButton.focus(); } });
+    const tabs = [...document.querySelectorAll('.tab')];
+    const panels = { upcoming: document.getElementById('upcoming-panel'), history: document.getElementById('history-panel') };
+    function selectTab(tab) {
+      const history = tab.id === 'history-tab';
+      tabs.forEach(button => { button.setAttribute('aria-selected', String(button === tab)); button.tabIndex = button === tab ? 0 : -1; });
+      panels.upcoming.hidden = history;
+      panels.history.hidden = !history;
+    }
+    tabs.forEach((tab, index) => { tab.addEventListener('click', () => selectTab(tab)); tab.addEventListener('keydown', event => { if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return; event.preventDefault(); const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : (index + (event.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length; selectTab(tabs[next]); tabs[next].focus(); }); });
+    const accountFeedback = document.getElementById('account-feedback');
+    const feedbackText = document.getElementById('account-feedback-text');
+    function showFeedback(message) { feedbackText.textContent = message; accountFeedback.hidden = false; }
+    document.getElementById('dismiss-account-feedback').addEventListener('click', () => { accountFeedback.hidden = true; });
+
+    const profileDetails = document.getElementById('profile-details');
+    const profileForm = document.getElementById('profile-form');
+    const editButton = document.getElementById('edit-profile');
+    const profileFields = ['name', 'email', 'phone'];
+    const currentProfile = () => Object.fromEntries(profileFields.map(key => [key, document.getElementById('profile-' + key).textContent]));
+    const restoreProfile = () => { const profile = currentProfile(); profileFields.forEach(key => { profileForm.elements.namedItem(key).value = profile[key]; }); };
+    function closeEdit() { restoreProfile(); profileForm.hidden = true; profileDetails.hidden = false; editButton.hidden = false; }
+    editButton.addEventListener('click', () => { restoreProfile(); profileDetails.hidden = true; profileForm.hidden = false; editButton.hidden = true; accountFeedback.hidden = true; profileForm.elements.namedItem('name').focus(); });
+    document.getElementById('discard-profile').addEventListener('click', () => { closeEdit(); editButton.focus(); });
+    profileForm.addEventListener('submit', event => {
+      event.preventDefault();
+      const values = Object.fromEntries(profileFields.map(key => [key, profileForm.elements.namedItem(key).value.trim()]));
+      const missing = profileFields.find(key => !values[key]);
+      if (missing) { const field = profileForm.elements.namedItem(missing); field.setCustomValidity('Vui lòng điền thông tin này.'); field.reportValidity(); return; }
+      profileFields.forEach(key => { document.getElementById('profile-' + key).textContent = values[key]; });
+      closeEdit();
+      showFeedback('Thông tin đã được cập nhật trong bản xem thử này. Thay đổi chưa được lưu vào hệ thống.');
+    });
+    profileForm.addEventListener('input', event => { if (event.target.matches('input')) event.target.setCustomValidity(''); });
+
+    const cancelButton = document.getElementById('request-cancel');
+    const cancelConfirm = document.getElementById('cancel-confirm');
+    function closeCancel() { cancelConfirm.hidden = true; cancelButton.setAttribute('aria-expanded', 'false'); }
+    cancelButton.addEventListener('click', () => { cancelConfirm.hidden = !cancelConfirm.hidden; cancelButton.setAttribute('aria-expanded', String(!cancelConfirm.hidden)); });
+    document.getElementById('keep-appointment').addEventListener('click', () => { closeCancel(); cancelButton.focus(); });
+    document.getElementById('confirm-cancel').addEventListener('click', () => {
+      const appointment = document.getElementById('waiting-appointment');
+      const status = document.getElementById('waiting-status');
+      status.classList.remove('waiting');
+      status.classList.add('cancelled');
+      status.textContent = 'Đã hủy · mẫu';
+      cancelButton.remove();
+      cancelConfirm.remove();
+      document.getElementById('history-list').prepend(appointment);
+      selectTab(document.getElementById('history-tab'));
+      document.getElementById('history-tab').focus();
+      showFeedback('Lịch mẫu đã chuyển sang mục Đã qua & đã hủy. Chưa có yêu cầu hủy nào được gửi đến bệnh viện.');
+    });
+  </script>
+</body>
+</html>

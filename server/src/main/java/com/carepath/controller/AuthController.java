@@ -27,4 +27,10 @@ public class AuthController {
         return ApiResponse.<LoginResponse>builder().result(res).build();
     }
 
+    @PostMapping("/login-admin")
+    public ApiResponse<LoginResponse> loginAdminAccount(@Valid @RequestBody LoginRequest request) {
+        LoginResponse res = this.authService.adminAuthenticate(request);
+        return ApiResponse.<LoginResponse>builder().result(res).build();
+    }
+
 }

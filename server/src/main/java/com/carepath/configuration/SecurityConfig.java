@@ -1,5 +1,7 @@
 package com.carepath.configuration;
 
+import javax.crypto.spec.SecretKeySpec;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,22 +16,24 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
 import io.jsonwebtoken.io.Decoders;
-import javax.crypto.spec.SecretKeySpec;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-	private final String[] PUBLISH_ENDPOINTS = { "/api/users", "/auth/login" };
+	private final String[] PUBLISH_ENDPOINTS = { "/api/users", "/api/auth/login", "/api/auth/login-admin" };
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity, JwtDecoder jwtDecoder,
 			AuthEntryPointJwt authEntryPointJwt) throws Exception {
 		httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, PUBLISH_ENDPOINTS)
-				.permitAll().anyRequest().authenticated())
+				.permitAll().requestMatchers("/api/admin", "/api/admin/**")
+				.hasRole("SUPERADMIN").anyRequest().authenticated())
 				.exceptionHandling(ex -> ex.authenticationEntryPoint(authEntryPointJwt))
 				.oauth2ResourceServer(oauth2 -> oauth2
 						.jwt(jwt -> jwt.decoder(jwtDecoder))
@@ -46,6 +50,17 @@ public class SecurityConfig {
 		return NimbusJwtDecoder.withSecretKey(new SecretKeySpec(key, "HmacSHA256"))
 				.macAlgorithm(MacAlgorithm.HS256)
 				.build();
+	}
+
+	@Bean
+	JwtAuthenticationConverter jwtAuthenticationConverter() {
+		var authorities = new JwtGrantedAuthoritiesConverter();
+		authorities.setAuthoritiesClaimName("accountType");
+		authorities.setAuthorityPrefix("ROLE_");
+
+		var converter = new JwtAuthenticationConverter();
+		converter.setJwtGrantedAuthoritiesConverter(authorities);
+		return converter;
 	}
 
 	@Bean
