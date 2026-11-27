@@ -3,6 +3,8 @@ package com.carepath.contracts;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 
+import com.carepath.entities.enums.AppointmentStatus;
+
 /**
  * IBookingService: Quản lý toàn bộ nghiệp vụ đặt lịch khám online (đặt theo dịch vụ),
  * hủy lịch, đổi lịch và kiểm tra sức chứa khả dụng của khung tiếp nhận.
@@ -85,7 +87,7 @@ public interface IBookingService {
                 // LocalDateTime estimatedStartTime,        // tương tự như startTime trong ReceptionWindow -> đổi tên để chỉ rõ thời gian khám dự kiến
                 // LocalDateTime estimatedEndTime,
                 // String timeDisclaimer, // Lưu ý giờ đăng ký là khung tiếp nhận dự kiến -> đánh dấu thời gian đăng ký
-                String status,         // BOOKED, CHECKED_IN, WAITING, IN_PROGRESS, COMPLETED, CANCELLED, NO_SHOW, RESCHEDULED
+                AppointmentStatus status,         // BOOKED, CHECKED_IN, WAITING, IN_PROGRESS, COMPLETED, CANCELLED, NO_SHOW, RESCHEDULED
                 String supersededById,
                 String parentAppointmentId,
                 String cancelledBy,

@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import com.carepath.entities.enums.WindowStatus;
+
 /**
  * IReceptionCapacityService: Quản lý việc khởi tạo, điều chỉnh sức chứa (capacity) và mở/đóng
  * các khung tiếp nhận bệnh nhân (ReceptionWindow) theo ca làm việc, dịch vụ và chính sách bệnh viện.
@@ -86,7 +88,7 @@ public interface IReceptionCapacityService {
          */
         ReceptionWindow setWindowStatus(
                 String windowId,
-                String status // OPEN | CLOSED | FULL (khớp WindowStatus enum)
+                WindowStatus status
         );
 
         /**
@@ -145,12 +147,12 @@ public interface IReceptionCapacityService {
                 ZonedDateTime endTime,
                 int capacity,
                 int overbookingLimit,
-                String status, // OPEN | CLOSED | FULL
+                WindowStatus status,
                 ZonedDateTime createdAt,
                 ZonedDateTime updatedAt
         ) {}
 
-        record      EffectiveCapacity(
+        record EffectiveCapacity(
                 String windowId,
                 int capacity,
                 int overbookingLimit,
