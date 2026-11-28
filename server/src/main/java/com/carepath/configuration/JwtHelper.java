@@ -33,31 +33,33 @@ public class JwtHelper {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-public String generateJwtToken(UserDetailsImpl userPrincipal) {
-    String accountType = userPrincipal.getAccountType();
-    String username = switch (accountType) {
-        case "USER" -> userPrincipal.getUsername();
-        case "SUPERADMIN" -> userPrincipal.getAdminUsername();
-        default -> throw new IllegalArgumentException("Loại tài khoản không hợp lệ");
-    };
+    public String generateJwtToken(UserDetailsImpl userPrincipal) {
+        String accountType = userPrincipal.getAccountType();
+        String username = switch (accountType) {
+            case "USER" -> userPrincipal.getUsername();
+            case "SUPERADMIN" -> userPrincipal.getAdminUsername();
+            default -> throw new IllegalArgumentException("Loại tài khoản không hợp lệ");
+        };
 
-    Date issuedAt = new Date();
-    return Jwts.builder()
-            .subject(username)
-            .claim("accountType", accountType)
-            .issuedAt(issuedAt)
-            .expiration(new Date(issuedAt.getTime() + JWT_EXP_MS))
-            .signWith(getSigningKey(), Jwts.SIG.HS256)
-            .compact();
-}
+        Date issuedAt = new Date();
+        return Jwts.builder()
+                .subject(userPrincipal.getAccountId().toString())
+                .claim("username", username)
+                .claim("accountType", accountType)
+                .issuedAt(issuedAt)
+                .expiration(new Date(issuedAt.getTime() + JWT_EXP_MS))
+                .signWith(getSigningKey(), Jwts.SIG.HS256)
+                .compact();
+    }
 
-    public SignedJWT verifyToken(String token) throws ParseException,JOSEException{
+    public SignedJWT verifyToken(String token) throws ParseException, JOSEException {
         JWSVerifier verifier = new MACVerifier(JWT_KEY.getBytes());
 
         SignedJWT signedJWT = SignedJWT.parse(token);
         Date expDate = signedJWT.getJWTClaimsSet().getExpirationTime();
         var verified = signedJWT.verify(verifier);
-         if (!(verified && expDate.after(new Date()))) throw new AppException(ErrorCode.UNAUTHENTICATE);
-         return signedJWT;
+        if (!(verified && expDate.after(new Date())))
+            throw new AppException(ErrorCode.UNAUTHENTICATE);
+        return signedJWT;
     }
 }

@@ -1,5 +1,6 @@
 package com.carepath.exception;
 
+import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -38,19 +39,30 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ExceptionHandler(value = MethodArgumentNotValidException.class)
     ResponseEntity<ApiResponse> handleValidation(MethodArgumentNotValidException exception) {
         log.error("Exception type={}", exception);
-        List<Map<String,String>> errors = new ArrayList<>();
-        for (var fieldError : exception.getBindingResult().getFieldErrors()){
-            Map<String,String> error = new  LinkedHashMap<>();
-            error.put("field",fieldError.getField());
-            error.put("message",fieldError.getDefaultMessage());
+        List<Map<String, String>> errors = new ArrayList<>();
+        for (var fieldError : exception.getBindingResult().getFieldErrors()) {
+            Map<String, String> error = new LinkedHashMap<>();
+            error.put("field", fieldError.getField());
+            error.put("message", fieldError.getDefaultMessage());
             errors.add(error);
         }
         ErrorCode errorCode = ErrorCode.INVALID_KEY;
 
-        return ResponseEntity.badRequest().body(ApiResponse.<List<Map<String, String>>>builder().status_code(errorCode.getCode()).message(errorCode.getMessage()).result(errors).build());
+        return ResponseEntity.badRequest().body(ApiResponse.<List<Map<String, String>>>builder()
+                .status_code(errorCode.getCode()).message(errorCode.getMessage()).result(errors).build());
+    }
+
+    @ExceptionHandler(value = AccessDeniedException.class)
+    ResponseEntity<ApiResponse> handleAccessDenied(AccessDeniedException exception) {
+        ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
+        return ResponseEntity.status(errorCode.getStatusCode())
+                .body(ApiResponse.builder()
+                        .status_code(errorCode.getCode())
+                        .message(errorCode.getMessage())
+                        .build());
     }
 
 }

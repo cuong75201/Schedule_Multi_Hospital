@@ -1,6 +1,7 @@
 package com.carepath.configuration;
 
 import java.util.Collection;
+import java.util.UUID;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
@@ -47,5 +48,12 @@ public class UserDetailsImpl implements UserDetails {
     public String getAccountType() {
         return this.accountType.name();
     }
+
+    public UUID getAccountId() {
+    return switch (accountType) {
+        case USER -> userAccountEntity.getId();
+        case SUPERADMIN -> adminEntity.getId();
+    };
+}
 
 }
