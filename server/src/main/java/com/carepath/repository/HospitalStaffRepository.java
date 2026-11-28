@@ -1,8 +1,10 @@
 package com.carepath.repository;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.carepath.entities.HospitalStaffEntity;
@@ -17,4 +19,8 @@ public interface HospitalStaffRepository extends JpaRepository<HospitalStaffEnti
             Collection<StaffRole> roles,
             EntityStatus staffStatus,
             EntityStatus accountStatus);
+
+    @EntityGraph(attributePaths = "hospital")
+    List<HospitalStaffEntity> findAllByUserAccount_IdAndStatus(
+            UUID accountId, EntityStatus status);
 }

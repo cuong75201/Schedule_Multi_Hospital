@@ -37,6 +37,5 @@ public class AccountService {
         }
         return userMapper.toRegisterResponse(user);
     }
-
     
 }

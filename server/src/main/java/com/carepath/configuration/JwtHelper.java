@@ -1,6 +1,8 @@
 package com.carepath.configuration;
 
 import java.text.ParseException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
@@ -26,7 +28,7 @@ public class JwtHelper {
     private String JWT_KEY;
 
     @Value("${jwt.valid_duration}")
-    private long JWT_EXP_MS;
+    private long JWT_EXP_SECOND;
 
     private SecretKey getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(this.JWT_KEY);
@@ -47,7 +49,7 @@ public class JwtHelper {
                 .claim("username", username)
                 .claim("accountType", accountType)
                 .issuedAt(issuedAt)
-                .expiration(new Date(issuedAt.getTime() + JWT_EXP_MS))
+                .expiration(new Date(Instant.now().plus(JWT_EXP_SECOND, ChronoUnit.SECONDS).toEpochMilli()))
                 .signWith(getSigningKey(), Jwts.SIG.HS256)
                 .compact();
     }
