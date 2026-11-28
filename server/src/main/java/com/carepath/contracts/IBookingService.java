@@ -1,7 +1,7 @@
 package com.carepath.contracts;
 
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 /**
  * IBookingService: Quản lý toàn bộ nghiệp vụ đặt lịch khám online (đặt theo dịch vụ),
@@ -65,6 +65,15 @@ public interface IBookingService {
         );
 
         /**
+        * Lấy danh sách tất cả lịch khám của một bệnh nhân (hỗ trợ nhiều lịch khám trên một tài khoản).
+        * @param patientId
+        * @return List<Appointment>
+        */
+        List<Appointment> getAppointmentsByPatient(
+                String patientId
+        );
+
+        /**
         * Hàm tiện ích: lấy thông tin chi tiết đơn đăng ký -> dùng cho rescheduleAppointment
         * @param appoointmentId
         * @return Appointment
@@ -81,7 +90,7 @@ public interface IBookingService {
                 String serviceId,
                 String windowId,
                 String doctorId,
-                LocalDate windowDate,
+                ZonedDateTime windowDate,
                 // LocalDateTime estimatedStartTime,        // tương tự như startTime trong ReceptionWindow -> đổi tên để chỉ rõ thời gian khám dự kiến
                 // LocalDateTime estimatedEndTime,
                 // String timeDisclaimer, // Lưu ý giờ đăng ký là khung tiếp nhận dự kiến -> đánh dấu thời gian đăng ký

@@ -1,6 +1,5 @@
 package com.carepath.contracts;
 
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -126,7 +125,7 @@ public interface IReceptionCapacityService {
                 String serviceId,
                 String doctorId,
                 String scheduleId,
-                LocalDate windowDate,
+                ZonedDateTime windowDate,
                 ZonedDateTime startTime,
                 ZonedDateTime endTime,
                 int suggestedCapacity,
@@ -140,7 +139,7 @@ public interface IReceptionCapacityService {
                 String serviceId,
                 String doctorId,
                 String scheduleId,
-                LocalDate windowDate,
+                ZonedDateTime windowDate,
                 ZonedDateTime startTime,
                 ZonedDateTime endTime,
                 int capacity,
